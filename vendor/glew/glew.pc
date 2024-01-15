@@ -1,0 +1,11 @@
+prefix=D:/Programming/CG/opengl-render/Basic_OpenGL_Render/out/install/x64-Debug
+exec_prefix=${prefix}
+libdir=D:/Programming/CG/opengl-render/Basic_OpenGL_Render/out/install/x64-Debug/lib
+includedir=${prefix}/include
+
+Name: glew
+Description: The OpenGL Extension Wrangler library
+Version: 2.1.0
+Cflags: -I${includedir} 
+Libs: -L${libdir} -lglew32
+Requires: glu
