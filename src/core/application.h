@@ -1,9 +1,9 @@
 #pragma once
 
 #include <memory>
+#include "renderer.h"
 
 #include "window.h"
-#include "renderer.h"
 
 namespace core
 {

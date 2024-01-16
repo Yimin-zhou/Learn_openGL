@@ -1,5 +1,4 @@
 #include <iostream>
-#include <GL/glew.h>
 
 #include "application.h"
 
@@ -18,13 +17,15 @@ namespace core
 		{
 			std::cout << "Error!" << std::endl;
 		}
-		std::cout << glGetString(GL_VERSION) << std::endl;
+		//std::cout << glGetString(GL_VERSION) << std::endl;
+
+		renderer->init();
 
 		/* Loop until the user closes the window */
 		while (!window->shouldClose())
 		{
 			/* Render here */
-			glClear(GL_COLOR_BUFFER_BIT);
+			renderer->draw();
 
 			/* Swap front and back buffers */
 			glfwSwapBuffers(window->get());
