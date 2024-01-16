@@ -8,7 +8,7 @@ namespace core
 	class Renderer
 	{
 	public:
-		Renderer();
+		Renderer(uint32_t height, uint32_t width);
 
 		void init();
 		void draw();
@@ -20,6 +20,9 @@ namespace core
 		void m_useShader(const std::string& vertexShaderSource ,const std::string& fragmentShaderSource);
 
 	private:
+		uint32_t m_height;
+		uint32_t m_width;
+
 		uint32_t m_vao;
 		uint32_t m_vbo;
 		uint32_t m_ebo;

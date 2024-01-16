@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 project(OpenGL_Render VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
-add_compile_definitions(GLEW_STATIC)
+
+# Add subdirectories
+add_subdirectory(vendor/glfw)
+add_subdirectory(vendor/glew)
 
 # Include directories
 include_directories(vendor/glfw/include)
@@ -10,10 +13,6 @@ include_directories(vendor/glew/include)
 
 # OpenGL package
 find_package(OpenGL REQUIRED)
-
-# Add subdirectories
-add_subdirectory(vendor/glfw)
-add_subdirectory(vendor/glew/build/cmake)
 
 # Core and utility source files
 set(CORE_SOURCES
@@ -46,4 +45,4 @@ add_custom_command(TARGET OpenGL_Render PRE_BUILD
                        ${SHADER_SOURCE_DIR} ${SHADER_DEST_DIR})
 
 # Link libraries
-target_link_libraries(OpenGL_Render OpenGL::GL glfw glew32sd) 
+target_link_libraries(OpenGL_Render OpenGL::GL glfw libglew_static) 

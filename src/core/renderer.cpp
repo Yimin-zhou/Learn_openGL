@@ -4,7 +4,8 @@
 
 namespace core
 {
-	Renderer::Renderer()
+	Renderer::Renderer(uint32_t height, uint32_t width)
+		: m_height(height), m_width(width)
 	{
 
 	}
@@ -20,6 +21,10 @@ namespace core
 
 	void Renderer::draw()
 	{
+		glViewport(0, 0, m_height, m_width);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
 		glBindVertexArray(m_vao); // bind VAO, which automatically binds EBO
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
