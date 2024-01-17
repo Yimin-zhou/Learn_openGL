@@ -1,29 +1,58 @@
 #pragma once
-
 #include <GL/glew.h>
 
-#include <string>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <exception>
+#include <filesystem>
+#include <vector>
 
 namespace util
 {
+	struct ShaderLoadingException : public std::runtime_error
+	{
+		using std::runtime_error::runtime_error;
+	};
+
 	class Shader
 	{
 	public:
-		Shader(const std::string& vertexShaderSource, const std::string& fragmentShaderSource);
+		Shader();
+		~Shader();
+		Shader(Shader&&);
+		Shader& operator=(Shader&&);
 
-		uint32_t get() { return m_shaderProgram; }
-
-		void bind();
-		void unbind();
-
-		void setUniform1i(const std::string& name, int value);
-		void setUniform1f(const std::string& name, float value);
-		void setUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
+	public:
+		void SetUniform(const std::string& name, float value);
+		void SetUniform(const std::string& name, int value);
+		void SetUniform(const std::string& name, const glm::vec3& value);
+		void SetUniform(const std::string& name, const glm::vec4& value);
+		void SetUniform(const std::string& name, const glm::mat3& value);
+		void SetUniform(const std::string& name, const glm::mat4& value);
+		void bind() const;
 
 	private:
-		static uint32_t m_compileShader(GLenum type, const std::string& source);
+		friend class ShaderBuilder;
+		Shader(uint32_t program);
 
 	private:
-		uint32_t m_shaderProgram;
+		uint32_t m_program;
+	};
+
+	class ShaderBuilder
+	{
+	public:
+		ShaderBuilder() = default;
+		ShaderBuilder(const ShaderBuilder&) = delete;
+		~ShaderBuilder();
+
+		ShaderBuilder& addStage(uint32_t shaderStage, std::filesystem::path shaderFile);
+		Shader build();
+
+	private:
+		void freeShaders();
+
+	private:
+		std::vector<uint32_t> m_shaders;
 	};
 }

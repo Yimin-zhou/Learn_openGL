@@ -1,8 +1,9 @@
 #include "core/application.h"
+#include "util/config.h"
 
 int main(void)
 {
-	core::application app(1920, 1080, "my renderer");
+	core::application app(windowWidth, windowHeight, windowName);
 	app.run();
 	return 0;
 }

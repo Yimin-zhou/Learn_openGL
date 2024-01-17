@@ -8,7 +8,7 @@ namespace core
 	class Window
 	{
 	public:
-		Window(uint32_t height, uint32_t width, const char* name);
+		Window(int height, int width, const char* name);
 
 		bool shouldClose() { return glfwWindowShouldClose(m_window); }
 		GLFWwindow* get() { return m_window; }

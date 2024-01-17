@@ -2,7 +2,7 @@
 
 namespace core
 {
-	Window::Window(uint32_t height, uint32_t width, const char* name)
+	Window::Window(int height, int width, const char* name)
 	{
 		glfwInit();
 		m_window = glfwCreateWindow(height, width, name, NULL, NULL);

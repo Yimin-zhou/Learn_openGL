@@ -1,5 +1,5 @@
 #pragma once
-#include "../util/shader.h"
+#include "util/shader.h"
 
 #include <string>
 
@@ -8,7 +8,8 @@ namespace core
 	class Renderer
 	{
 	public:
-		Renderer(uint32_t height, uint32_t width);
+		Renderer(int height, int width);
+		~Renderer();
 
 		void init();
 		void draw();
@@ -17,11 +18,14 @@ namespace core
 
 	private:
 		void m_generateBuffers();
-		void m_useShader(const std::string& vertexShaderSource ,const std::string& fragmentShaderSource);
+		void m_generateShaders(const std::filesystem::path& vertexShaderSource, const std::filesystem::path& fragmentShaderSource);
 
 	private:
-		uint32_t m_height;
-		uint32_t m_width;
+		util::Shader m_lambertShader;
+
+	private:
+		int m_height;
+		int m_width;
 
 		uint32_t m_vao;
 		uint32_t m_vbo;
@@ -32,7 +36,8 @@ namespace core
 		uint32_t m_shaderProgram;
 
 		// A test triangle
-		float m_indices[6] = 
+		uint32_t m_numIndices = 3;
+		uint32_t m_indices[3] =
 		{
 			0, 1, 2
 		};

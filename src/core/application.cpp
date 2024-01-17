@@ -2,9 +2,25 @@
 
 #include "application.h"
 
+void framebuffer_size_callback(GLFWwindow* window, int  width, int  height)
+{
+	const float aspectRatio = 16.0f / 9.0f;
+	int w = width;
+	int h = static_cast<int>(width / aspectRatio);
+	if (h > height)
+	{
+		h = height;
+		w = static_cast<int>(height * aspectRatio);
+	}
+	int x = (width - w) / 2;
+	int y = (height - h) / 2;
+	glViewport(x, y, w, h);
+}
+
+
 namespace core
 {
-	application::application(uint32_t h, uint32_t w, const char* name)
+	application::application(int h, int w, const char* name)
 	: m_height(h), m_width(w), m_name(name)
 	{
 		window = std::make_shared<Window>(m_height, m_width, m_name);
@@ -17,7 +33,12 @@ namespace core
 		{
 			std::cout << "Error!" << std::endl;
 		}
-		//std::cout << glGetString(GL_VERSION) << std::endl;
+		
+		// Set the viewport
+		int width, height;
+		glfwSetFramebufferSizeCallback(window->get(), framebuffer_size_callback);
+		glfwGetFramebufferSize(window->get(), &width, &height);
+		framebuffer_size_callback(window->get(), width, height);
 
 		renderer->init();
 
