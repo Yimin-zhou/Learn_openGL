@@ -17,23 +17,36 @@ void framebuffer_size_callback(GLFWwindow* window, int  width, int  height)
 	glViewport(x, y, w, h);
 }
 
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+	// Print the debug message
+	std::cerr << "GL CALLBACK: " << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "") << "type = " << type << ", severity = " << severity << ", message = " << message << std::endl;
+}
 
 namespace core
 {
 	application::application(int h, int w, const char* name)
 	: m_height(h), m_width(w), m_name(name)
 	{
-		window = std::make_shared<Window>(m_height, m_width, m_name);
+		window = std::make_shared <util:: Window > (m_height, m_width, m_name);
 		renderer = std::make_shared<Renderer>(m_height, m_width);
 	}
 
-	void application::run()
+	void application::init()
 	{
+		glewExperimental = GL_TRUE;
 		if (glewInit() != GLEW_OK)
 		{
 			std::cout << "Error!" << std::endl;
 		}
-		
+
+#ifdef _DEBUG
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(MessageCallback, 0);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, NULL, GL_TRUE);
+#endif
+
 		// Set the viewport
 		int width, height;
 		glfwSetFramebufferSizeCallback(window->get(), framebuffer_size_callback);
@@ -41,6 +54,11 @@ namespace core
 		framebuffer_size_callback(window->get(), width, height);
 
 		renderer->init();
+	}
+
+	void application::run()
+	{
+		init();
 
 		/* Loop until the user closes the window */
 		while (!window->shouldClose())

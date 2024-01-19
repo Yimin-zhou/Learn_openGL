@@ -7,7 +7,7 @@
 
 #include "shader.h"
 
-namespace util
+namespace render
 {
 	static constexpr uint32_t invalid = 0xFFFFFFFF;
 
@@ -48,46 +48,52 @@ namespace util
 		return *this;
 	}
 
-	void Shader::SetUniform(const std::string& name, float value)
+	void Shader::setUniform(const std::string& name, float value)
 	{
-		assert(m_program != invalid);
 		int32_t location = glGetUniformLocation(m_program, name.c_str());
+		assert(location != -1);
 		glUniform1f(location, value);
 	}
 
-	void Shader::SetUniform(const std::string& name, int value)
+	void Shader::setUniform(const std::string& name, int value)
 	{
-		assert(m_program != invalid);
 		int32_t location = glGetUniformLocation(m_program, name.c_str());
+		assert(location != -1);
 		glUniform1i(location, value);
 	}
 
-	void Shader::SetUniform(const std::string& name, const glm::vec3& value)
+	void Shader::setUniform(const std::string& name, const glm::vec2& value)
 	{
-		assert(m_program != invalid);
 		int32_t location = glGetUniformLocation(m_program, name.c_str());
+		assert(location != -1);
+		glUniform2fv(location, 1, glm::value_ptr(value));
+	}
+
+	void Shader::setUniform(const std::string& name, const glm::vec3& value)
+	{
+		int32_t location = glGetUniformLocation(m_program, name.c_str());
+		assert(location != -1);
 		glUniform3fv(location, 1, glm::value_ptr(value));
 	}
 
-	void Shader::SetUniform(const std::string& name, const glm::vec4& value)
+	void Shader::setUniform(const std::string& name, const glm::vec4& value)
 	{
-		assert(m_program != invalid);
-		int32_t location = glGetUniformLocation(m_program, name.c_str());
+		int32_t location = glGetUniformLocation(m_program, name.c_str());		
+		assert(location != -1);
 		glUniform4fv(location, 1, glm::value_ptr(value));
 	}
 
-	void Shader::SetUniform(const std::string& name, const glm::mat3& value)
+	void Shader::setUniform(const std::string& name, const glm::mat3& value)
 	{
-		assert(m_program != invalid);
 		int32_t location = glGetUniformLocation(m_program, name.c_str());
+		assert(location != -1);
 		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
-	void Shader::SetUniform(const std::string& name, const glm::mat4& value)
+	void Shader::setUniform(const std::string& name, const glm::mat4& value)
 	{
-		assert(m_program != invalid);
-
 		int32_t location = glGetUniformLocation(m_program, name.c_str());
+		assert(location != -1);
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
@@ -103,7 +109,7 @@ namespace util
 		freeShaders();
 	}
 
-	ShaderBuilder& ShaderBuilder::addStage(uint32_t shaderType, std::filesystem::path shaderFile)
+	ShaderBuilder& ShaderBuilder::addStage(uint32_t shaderType, const std::filesystem::path& shaderFile)
 	{
 		if (!std::filesystem::exists(shaderFile)) 
 		{

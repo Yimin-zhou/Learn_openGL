@@ -7,7 +7,7 @@
 #include <filesystem>
 #include <vector>
 
-namespace util
+namespace render
 {
 	struct ShaderLoadingException : public std::runtime_error
 	{
@@ -23,12 +23,13 @@ namespace util
 		Shader& operator=(Shader&&);
 
 	public:
-		void SetUniform(const std::string& name, float value);
-		void SetUniform(const std::string& name, int value);
-		void SetUniform(const std::string& name, const glm::vec3& value);
-		void SetUniform(const std::string& name, const glm::vec4& value);
-		void SetUniform(const std::string& name, const glm::mat3& value);
-		void SetUniform(const std::string& name, const glm::mat4& value);
+		void setUniform(const std::string& name, float value);
+		void setUniform(const std::string& name, int value);
+		void setUniform(const std::string& name, const glm::vec2& value);
+		void setUniform(const std::string& name, const glm::vec3& value);
+		void setUniform(const std::string& name, const glm::vec4& value);
+		void setUniform(const std::string& name, const glm::mat3& value);
+		void setUniform(const std::string& name, const glm::mat4& value);
 		void bind() const;
 
 	private:
@@ -46,7 +47,7 @@ namespace util
 		ShaderBuilder(const ShaderBuilder&) = delete;
 		~ShaderBuilder();
 
-		ShaderBuilder& addStage(uint32_t shaderStage, std::filesystem::path shaderFile);
+		ShaderBuilder& addStage(uint32_t shaderStage, const std::filesystem::path& shaderFile);
 		Shader build();
 
 	private:

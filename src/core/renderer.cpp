@@ -33,17 +33,17 @@ namespace core
 		glClearColor(0.2f, 0.2f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		m_lambertShader.bind();
+		m_useShader();
 		glBindVertexArray(m_vao); // bind VAO, which automatically binds EBO
 		glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
 
-		// test triangle
-		glBegin(GL_TRIANGLES);
-		glVertex3f(-0.5f, -0.5f, 0.0f); // Left
-		glVertex3f(0.5f, -0.5f, 0.0f); // Right
-		glVertex3f(0.0f, 0.5f, 0.0f); // Top
-		glEnd();
+		//// test triangle
+		//glBegin(GL_TRIANGLES);
+		//glVertex3f(-0.5f, -0.5f, 0.0f); // Left
+		//glVertex3f(0.5f, -0.5f, 0.0f); // Right
+		//glVertex3f(0.0f, 0.5f, 0.0f); // Top
+		//glEnd();
 	}
 
 	void Renderer::clear()
@@ -65,15 +65,15 @@ namespace core
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(m_indices), m_indices, GL_STATIC_DRAW);
 
 		// Position attribute
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
 		// Normal attribute
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 
 		// Texture coordinate attribute
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(6 * sizeof(float)));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 		glEnableVertexAttribArray(2);
 
 		// unbind, so other calls won't accidentally modify our VAO
@@ -85,9 +85,16 @@ namespace core
 
 	void Renderer::m_generateShaders(const std::filesystem::path& vertexShaderPath, const std::filesystem::path& fragmentShaderPath)
 	{
-		util::ShaderBuilder lambertBuilder;
+		render::ShaderBuilder lambertBuilder;
 		lambertBuilder.addStage(GL_VERTEX_SHADER, vertexShaderPath);
 		lambertBuilder.addStage(GL_FRAGMENT_SHADER, fragmentShaderPath);
 		m_lambertShader = lambertBuilder.build();
 	}
+
+	void Renderer::m_useShader()
+	{
+		m_lambertShader.bind();
+		m_lambertShader.setUniform("color", glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	}
+
 }

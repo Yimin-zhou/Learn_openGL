@@ -1,5 +1,5 @@
 #pragma once
-#include "util/shader.h"
+#include "render/shader.h"
 
 #include <string>
 
@@ -19,9 +19,10 @@ namespace core
 	private:
 		void m_generateBuffers();
 		void m_generateShaders(const std::filesystem::path& vertexShaderSource, const std::filesystem::path& fragmentShaderSource);
+		void m_useShader();
 
 	private:
-		util::Shader m_lambertShader;
+		render::Shader m_lambertShader;
 
 	private:
 		int m_height;
@@ -47,7 +48,7 @@ namespace core
 			// positions			// normals			// texture coords
 			-0.5f, -0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	0.0f, 0.0f,	// bottom left
 			0.5f, -0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	1.0f, 0.0f,	// bottom right
-			0.5f, 0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	1.0f, 1.0f,	// top right
+			0.0f, 0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	1.0f, 1.0f,	// top
 		};
 	};
 }

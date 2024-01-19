@@ -3,7 +3,7 @@
 
 int main(void)
 {
-	core::application app(windowWidth, windowHeight, windowName);
+	core::application app(config::windowWidth, config::windowHeight, config::windowName);
 	app.run();
 	return 0;
 }

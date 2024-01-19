@@ -1,6 +1,6 @@
 #include "window.h"
 
-namespace core
+namespace util
 {
 	Window::Window(int height, int width, const char* name)
 	{
@@ -11,5 +11,6 @@ namespace core
 			glfwTerminate();
 		}
 		glfwMakeContextCurrent(m_window);
+		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 	}
 }

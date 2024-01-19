@@ -3,7 +3,7 @@
 #include <memory>
 #include <GLFW/glfw3.h>
 
-namespace core
+namespace util
 {
 	class Window
 	{
