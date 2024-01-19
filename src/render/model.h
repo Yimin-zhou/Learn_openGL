@@ -1,6 +1,4 @@
 #pragma once
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "tiny_obj_loader.h"
 
 #include <filesystem>
 
@@ -15,7 +13,6 @@ namespace render
 	class Model
 	{
 	public:
-		Model();
 		Model(std::filesystem::path path);
 
 		void draw();

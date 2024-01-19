@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <unordered_map>
+#include <memory>
 
 #include "shader.h"
 
@@ -12,16 +13,12 @@ namespace render
 	{
 	public:
 		Material();
-		//explicit Material(const Shader& shader); // Constructor with Shader
+		//explicit Material(const Shader& shader); // Constructor with Shad
 
 		void use() const;
 
-		void setFloat(const std::string& name, float value);
-		void setInteger(const std::string& name, int value);
-		void setVector2f(const std::string& name, const glm::vec2& value);
-		void setVector3f(const std::string& name, const glm::vec3& value);
-		void setVector4f(const std::string& name, const glm::vec4& value);
-		void setMatrix4f(const std::string& name, const glm::mat4& value);
+		// get the shader
+		std::shared_ptr<Shader> getShader() const;
 
 		// Add methods for setting textures, if necessary
 
@@ -30,6 +27,9 @@ namespace render
 		glm::vec3 diffuse = glm::vec3(1.0f);
 
 	private:
-		//Shader m_shader;
+		void m_generateShaders(const std::filesystem::path& vertexShaderPath, const std::filesystem::path& fragmentShaderPath);
+
+	private:
+		std::shared_ptr<Shader> m_shader;
 	};
 }

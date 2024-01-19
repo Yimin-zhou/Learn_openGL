@@ -80,7 +80,7 @@ namespace render
 	{
 		int32_t location = glGetUniformLocation(m_program, name.c_str());		
 		assert(location != -1);
-		glUniform4fv(location, 1, glm::value_ptr(value));
+		glUniform4fv(0, 1, glm::value_ptr(value));
 	}
 
 	void Shader::setUniform(const std::string& name, const glm::mat3& value)
@@ -109,7 +109,7 @@ namespace render
 		freeShaders();
 	}
 
-	ShaderBuilder& ShaderBuilder::addStage(uint32_t shaderType, const std::filesystem::path& shaderFile)
+	ShaderBuilder& ShaderBuilder::addStage(GLenum shaderType, const std::filesystem::path& shaderFile)
 	{
 		if (!std::filesystem::exists(shaderFile)) 
 		{
@@ -131,7 +131,7 @@ namespace render
 		return *this;
 	}
 
-	Shader ShaderBuilder::build()
+	std::shared_ptr<Shader> ShaderBuilder::build()
 	{
 		// Combine all shaders into a single shader program.
 		uint32_t program = glCreateProgram();
@@ -147,7 +147,7 @@ namespace render
 			throw ShaderLoadingException("Shader program failed to link");
 		}
 
-		return Shader(program);
+		return std::make_shared<Shader>(program);
 	}
 
 	void ShaderBuilder::freeShaders()

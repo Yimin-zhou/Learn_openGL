@@ -54,5 +54,13 @@ add_custom_command(TARGET OpenGL_Render PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                        ${SHADER_SOURCE_DIR} ${SHADER_DEST_DIR})
 
+# Copy res files
+set(RES_SOURCE_DIR "${CMAKE_SOURCE_DIR}/res")
+set(RES_DEST_DIR "${CMAKE_BINARY_DIR}/res")
+file(MAKE_DIRECTORY ${RES_DEST_DIR})
+add_custom_command(TARGET OpenGL_Render PRE_BUILD
+				   COMMAND ${CMAKE_COMMAND} -E copy_directory
+					   ${RES_SOURCE_DIR} ${RES_DEST_DIR})
+
 # Link libraries
 target_link_libraries(OpenGL_Render OpenGL::GL glfw libglew_static) 

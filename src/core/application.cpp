@@ -29,7 +29,7 @@ namespace core
 	: m_height(h), m_width(w), m_name(name)
 	{
 		window = std::make_shared <util:: Window > (m_height, m_width, m_name);
-		renderer = std::make_shared<Renderer>(m_height, m_width);
+		renderer = std::make_shared<Renderer>();
 	}
 
 	void application::init()

@@ -5,48 +5,34 @@ namespace render
 
 	Material::Material()
 	{
-
+		std::filesystem::path vtPath = "shader/lambert_vert.glsl";
+		std::filesystem::path fgPath = "shader/lambert_frag.glsl";
+		m_generateShaders(vtPath, fgPath);
 	}
 
 	//Material::Material(const Shader& shader) : m_shader(std::move(shader)) {}
 
 	void Material::use() const 
 	{
-		//m_shader.bind(); // Assuming Shader class has a use() method
+		m_shader->bind(); // Assuming Shader class has a use() method
 		// Set global material properties
 		//m_shader.setUniform("material.shininess", shininess);
 		//m_shader.setUniform("material.diffuse", diffuse);
 		// Set other material properties
 	}
 
-	void Material::setFloat(const std::string& name, float value) 
+
+	std::shared_ptr<render::Shader> Material::getShader() const
 	{
-		//m_shader.setUniform(name, value);
+		return m_shader;
 	}
 
-	void Material::setInteger(const std::string& name, int value) 
+	void Material::m_generateShaders(const std::filesystem::path& vertexShaderPath, const std::filesystem::path& fragmentShaderPath)
 	{
-		//m_shader.setUniform(name, value);
-	}
-
-	void Material::setVector2f(const std::string& name, const glm::vec2& value) 
-	{
-		//m_shader.setUniform(name, value);
-	}
-
-	void Material::setVector3f(const std::string& name, const glm::vec3& value) 
-	{
-		//m_shader.setUniform(name, value);
-	}
-
-	void Material::setVector4f(const std::string& name, const glm::vec4& value) 
-	{
-		//m_shader.setUniform(name, value);
-	}
-
-	void Material::setMatrix4f(const std::string& name, const glm::mat4& value) 
-	{
-		//m_shader.setUniform(name, value);
+		render::ShaderBuilder lambertBuilder;
+		lambertBuilder.addStage(GL_VERTEX_SHADER, vertexShaderPath);
+		lambertBuilder.addStage(GL_FRAGMENT_SHADER, fragmentShaderPath);
+		m_shader = lambertBuilder.build();
 	}
 
 }

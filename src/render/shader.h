@@ -6,6 +6,7 @@
 #include <exception>
 #include <filesystem>
 #include <vector>
+#include <memory>
 
 namespace render
 {
@@ -17,6 +18,7 @@ namespace render
 	class Shader
 	{
 	public:
+		Shader(uint32_t program);
 		Shader();
 		~Shader();
 		Shader(Shader&&);
@@ -34,7 +36,6 @@ namespace render
 
 	private:
 		friend class ShaderBuilder;
-		Shader(uint32_t program);
 
 	private:
 		uint32_t m_program;
@@ -47,8 +48,8 @@ namespace render
 		ShaderBuilder(const ShaderBuilder&) = delete;
 		~ShaderBuilder();
 
-		ShaderBuilder& addStage(uint32_t shaderStage, const std::filesystem::path& shaderFile);
-		Shader build();
+		ShaderBuilder& addStage(GLenum shaderStage, const std::filesystem::path& shaderFile);
+		std::shared_ptr<Shader> build();
 
 	private:
 		void freeShaders();

@@ -22,7 +22,7 @@ namespace render
 	{
 		uint32_t baseVertex;
 		uint32_t baseIndex;
-		uint32_t materialIndex;
+		int materialIndex;
 		uint32_t numIndices;
 	};
 
