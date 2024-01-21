@@ -3,7 +3,8 @@
 
 int main(void)
 {
-	core::application app(config::windowWidth, config::windowHeight, config::windowName);
+	std::cout << "Current Path: " << std::filesystem::current_path() << std::endl;
+	application app(config::windowWidth, config::windowHeight, config::windowName);
 	app.run();
 	return 0;
 }

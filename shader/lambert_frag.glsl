@@ -6,9 +6,9 @@ in vec2 TexCoords;
 
 out vec4 FragColor;
 
-uniform vec4 color;
+uniform vec4 diffuse;
 
 void main() 
 {
-    FragColor = vec4(color.rgb, 1.0f);
+    FragColor = vec4(diffuse.rgb, 1.0f);
 }

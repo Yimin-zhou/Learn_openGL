@@ -12,6 +12,7 @@ include_directories(vendor/glfw/include)
 include_directories(vendor/glew/include)
 include_directories(vendor/glm)
 include_directories(vendor/tinyobjloader)
+include_directories(vendor/stb_image)
 include_directories(src)
 
 # OpenGL package
@@ -20,23 +21,28 @@ find_package(OpenGL 4.3 REQUIRED)
 # Core and utility source files
 set(CORE_SOURCES
 
-    "src/core/renderer.cpp" 
-    "src/core/renderer.h"
+    "src/render/renderer.cpp" 
+    "src/render/renderer.h"
     "src/core/application.cpp" 
     "src/core/application.h"
- )
+  "src/material/texture.h")
 
  set(RENDER_SOURCES
-    "src/render/model.h"
-    "src/render/shader.h"
-    "src/render/shader.cpp"
-  "src/render/model.cpp" "src/render/material.h" "src/render/mesh.h" "src/render/mesh.cpp" "src/render/material.cpp")
+    "src/model/model.h"
+    "src/material/shader.h"
+    "src/material/shader.cpp"
+  "src/model/model.cpp" 
+  "src/material/material.h" 
+  "src/model/mesh.h" 
+  "src/model/mesh.cpp" 
+  "src/material/material.cpp" "src/material/texture.h" "src/material/texture.cpp")
 
 set(UTIL_SOURCES
     "src/util/window.cpp" 
     "src/util/window.h" 
     "src/util/config.h"
- "src/util/objLoader.h" "src/util/objLoader.cpp")
+  
+ )
 
 # Add executable
 add_executable(OpenGL_Render 
@@ -44,7 +50,7 @@ add_executable(OpenGL_Render
     ${CORE_SOURCES} 
     ${UTIL_SOURCES}
     ${RENDER_SOURCES}
-)
+ "vendor/stb_image/stb_iamge.cpp" "src/material/texture.h" "src/material/texture.cpp")
 
 # Copy shader files
 set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/shader")

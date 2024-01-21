@@ -23,57 +23,53 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 	std::cerr << "GL CALLBACK: " << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "") << "type = " << type << ", severity = " << severity << ", message = " << message << std::endl;
 }
 
-namespace core
+application::application(int h, int w, const char* name)
+: m_height(h), m_width(w), m_name(name)
 {
-	application::application(int h, int w, const char* name)
-	: m_height(h), m_width(w), m_name(name)
-	{
-		window = std::make_shared <util:: Window > (m_height, m_width, m_name);
-		renderer = std::make_shared<Renderer>();
-	}
+	window = std::make_shared <Window > (m_height, m_width, m_name);
+	renderer = std::make_shared<Renderer>();
+}
 
-	void application::init()
+void application::init()
+{
+	glewExperimental = GL_TRUE;
+	if (glewInit() != GLEW_OK)
 	{
-		glewExperimental = GL_TRUE;
-		if (glewInit() != GLEW_OK)
-		{
-			std::cout << "Error!" << std::endl;
-		}
+		std::cout << "Error!" << std::endl;
+	}
 
 #ifdef _DEBUG
-		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(MessageCallback, 0);
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, NULL, GL_TRUE);
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	glDebugMessageCallback(MessageCallback, 0);
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, NULL, GL_TRUE);
 #endif
 
-		// Set the viewport
-		int width, height;
-		glfwSetFramebufferSizeCallback(window->get(), framebuffer_size_callback);
-		glfwGetFramebufferSize(window->get(), &width, &height);
-		framebuffer_size_callback(window->get(), width, height);
+	// Set the viewport
+	int width, height;
+	glfwSetFramebufferSizeCallback(window->get(), framebuffer_size_callback);
+	glfwGetFramebufferSize(window->get(), &width, &height);
+	framebuffer_size_callback(window->get(), width, height);
 
-		renderer->init();
-	}
+	renderer->init();
+}
 
-	void application::run()
+void application::run()
+{
+	init();
+
+	/* Loop until the user closes the window */
+	while (!window->shouldClose())
 	{
-		init();
+		/* Render here */
+		renderer->draw();
 
-		/* Loop until the user closes the window */
-		while (!window->shouldClose())
-		{
-			/* Render here */
-			renderer->draw();
+		/* Swap front and back buffers */
+		glfwSwapBuffers(window->get());
 
-			/* Swap front and back buffers */
-			glfwSwapBuffers(window->get());
-
-			/* Poll for and process events */
-			glfwPollEvents();
-		}
-
-		glfwTerminate();
+		/* Poll for and process events */
+		glfwPollEvents();
 	}
 
+	glfwTerminate();
 }
