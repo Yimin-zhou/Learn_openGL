@@ -78,7 +78,7 @@ void Shader::setUniform(const std::string& name, const glm::vec4& value)
 {
 	int32_t location = glGetUniformLocation(m_program, name.c_str());		
 	if (location == -1) std::cerr << "Uniform " << name << " not found" << std::endl;
-	glUniform4fv(0, 1, glm::value_ptr(value));
+	glUniform4fv(location, 1, glm::value_ptr(value));
 }
 
 void Shader::setUniform(const std::string& name, const glm::mat3& value)

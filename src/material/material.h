@@ -6,15 +6,21 @@
 #include <memory>
 
 #include "shader.h"
+#include "texture.h"
 
 struct PBRParameter
 {
-	glm::vec3 albedo = glm::vec3(1.0f);
+	glm::vec3 ambient = glm::vec3(1.0f);
 	glm::vec3 diffuse = glm::vec3(1.0f);
-	/*float metallic = 0.0f;
-	float roughness = 0.0f;
-	float ao = 1.0f;*/
+	glm::vec3 specular = glm::vec3(1.0f);
+
+	// texture
+	std::shared_ptr<Texture> albedoMap;
+	//std::shared_ptr<Texture> specularMap;
+	//std::shared_ptr<Texture> normalMap;
+	//std::shared_ptr<Texture> heightMap;
 };
+
 
 class Material 
 {

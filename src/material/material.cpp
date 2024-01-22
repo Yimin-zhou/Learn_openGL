@@ -7,11 +7,12 @@ Material::Material()
 
 void Material::use() const 
 {
-	m_shader->bind(); // Assuming Shader class has a use() method
-	// Set global material properties
+	m_shader->bind();
+	// Set material properties
 	m_shader->setUniform("diffuse", glm::vec4(pbrParameter.diffuse, 1.0f));
-	//m_shader.setUniform("material.shininess", shininess);
-	// Set other material properties
+	pbrParameter.albedoMap->bind(0);
+	m_shader->setUniform("albedoMap", 0);
+
 }
 
 std::shared_ptr<Shader> Material::getShader() const

@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "model.h"
+#include "material/texture.h"
 
 Model::Model(const std::filesystem::path& path)
 {
@@ -39,7 +40,7 @@ void Model::m_loadMesh(const std::filesystem::path& filePath)
 	{
 		std::cerr << "Error: " << err << std::endl;
 	}
-	// TODO: Load materials
+	// TODO: create default materials
 	if (tinyMaterials.empty())
 	{
 		Material material;
@@ -53,6 +54,7 @@ void Model::m_loadMesh(const std::filesystem::path& filePath)
 		{
 			Material material;
 			material.pbrParameter.diffuse = glm::vec3(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2]);
+			material.pbrParameter.albedoMap = std::make_shared<Texture>(parentPath / mat.diffuse_texname);
 			// Add more material properties here as needed
 			m_materials.push_back(material);
 		}
