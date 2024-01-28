@@ -27,7 +27,7 @@ class Material
 public:
 	Material();
 
-	void use() const;
+	void use(const glm::mat4& modelMatrix, const glm::mat4& viewProjectionMatrix) const;
 
 	// get the shader
 	std::shared_ptr<Shader> getShader() const;

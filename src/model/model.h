@@ -14,9 +14,11 @@ public:
 
 	void draw();
 
-	void setPosition(glm::vec3 position);
-	void setRotation(glm::vec3 rotation);
-	void setScale(glm::vec3 scale);
+	void setPosition(const glm::vec3& position);
+	void setRotation(const glm::vec3& rotation);
+	void setScale(const glm::vec3& scale);
+
+	void setViewProjectionMatrix(const glm::mat4& viewProjectionMatrix);
 
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();
@@ -30,6 +32,7 @@ private:
 	glm::vec3 m_rotation;
 	glm::vec3 m_scale;
 	glm::mat4 m_modelMatrix;
+	glm::mat4 m_viewProjectionMatrix;
 
 private:
 	void m_loadMesh(const std::filesystem::path& filePath);

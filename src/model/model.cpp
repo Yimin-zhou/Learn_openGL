@@ -6,7 +6,8 @@
 #include "model.h"
 #include "material/texture.h"
 
-Model::Model(const std::filesystem::path& path)
+Model::Model(const std::filesystem::path& path) :
+	m_modelMatrix(1.0f), m_viewProjectionMatrix(1.0f), m_position(0.0f), m_rotation(0.0f), m_scale(1.0f)
 {
 	m_loadMesh(path);
 }
@@ -15,8 +16,56 @@ void Model::draw()
 {
 	for (int i = 0; i < m_meshes.size(); i++)
 	{
-		m_meshes[i].draw();
+		m_meshes[i].draw(m_modelMatrix, m_viewProjectionMatrix);
 	}
+}
+
+void Model::setPosition(const glm::vec3& position)
+{
+	m_position = position;
+	m_updateModelMatrix();
+}
+
+void Model::setRotation(const glm::vec3& rotation)
+{
+	m_rotation = rotation;
+	m_updateModelMatrix();
+}
+
+void Model::setScale(const glm::vec3& scale)
+{
+	m_scale = scale;
+	m_updateModelMatrix();
+}
+
+void Model::setViewProjectionMatrix(const glm::mat4& viewProjectionMatrix)
+{
+	m_viewProjectionMatrix = viewProjectionMatrix;
+}
+
+glm::vec3 Model::getPosition()
+{
+	return m_position;
+}
+
+glm::vec3 Model::getRotation()
+{
+	return m_rotation;
+}
+
+glm::vec3 Model::getScale()
+{
+	return m_scale;
+}
+
+void Model::m_updateModelMatrix()
+{
+	m_modelMatrix = glm::mat4(1.0f);
+	m_modelMatrix = glm::translate(m_modelMatrix, m_position);
+	m_modelMatrix = glm::rotate(m_modelMatrix, glm::radians(m_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+	m_modelMatrix = glm::rotate(m_modelMatrix, glm::radians(m_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	m_modelMatrix = glm::rotate(m_modelMatrix, glm::radians(m_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+	m_modelMatrix = glm::scale(m_modelMatrix, m_scale);
 }
 
 void Model::m_loadMesh(const std::filesystem::path& filePath)

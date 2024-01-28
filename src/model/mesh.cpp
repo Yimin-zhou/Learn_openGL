@@ -66,7 +66,7 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
 	return *this;
 }
 
-void Mesh::draw() const
+void Mesh::draw(const glm::mat4& modelMatrix, const glm::mat4& viewProjectionMatrix) const
 {
 	glBindVertexArray(m_vao);
 	for (const auto& entry : m_entries) 
@@ -76,7 +76,7 @@ void Mesh::draw() const
 		{
 			materialIndex = 0;
 		}
-		m_materials[materialIndex].use();
+		m_materials[materialIndex].use(modelMatrix, viewProjectionMatrix);
 
 		glDrawElementsBaseVertex(GL_TRIANGLES,
 			entry.numIndices,

@@ -4,7 +4,7 @@
 int main(void)
 {
 	std::cout << "Current Path: " << std::filesystem::current_path() << std::endl;
-	application app(config::windowWidth, config::windowHeight, config::windowName);
+	Application app(config::windowWidth, config::windowHeight, config::windowName);
 	app.run();
 	return 0;
 }

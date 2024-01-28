@@ -2,20 +2,24 @@
 
 #include "application.h"
 
-void framebuffer_size_callback(GLFWwindow* window, int  width, int  height)
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) 
 {
-	const float aspectRatio = 16.0f / 9.0f;
-	int w = width;
-	int h = static_cast<int>(width / aspectRatio);
-	if (h > height)
+	const float targetAspectRatio = 16.0f / 9.0f;
+	int viewportWidth = width;
+	int viewportHeight = static_cast<int>(viewportWidth / targetAspectRatio);
+
+	if (viewportHeight > height) 
 	{
-		h = height;
-		w = static_cast<int>(height * aspectRatio);
+		viewportHeight = height;
+		viewportWidth = static_cast<int>(viewportHeight * targetAspectRatio);
 	}
-	int x = (width - w) / 2;
-	int y = (height - h) / 2;
-	glViewport(x, y, w, h);
+
+	int x = (width - viewportWidth) / 2;
+	int y = (height - viewportHeight) / 2;
+
+	glViewport(x, y, viewportWidth, viewportHeight);
 }
+
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
@@ -23,14 +27,14 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 	std::cerr << "GL CALLBACK: " << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "") << "type = " << type << ", severity = " << severity << ", message = " << message << std::endl;
 }
 
-application::application(int h, int w, const char* name)
-: m_height(h), m_width(w), m_name(name)
+Application::Application(int h, int w, const char* name)
+: m_height(h), m_width(w), m_name(name), m_deltaTime(0.0f), m_lastFrame(0.0f)
 {
-	window = std::make_shared <Window > (m_height, m_width, m_name);
-	renderer = std::make_shared<Renderer>();
+	m_window = std::make_shared<Window>(m_height, m_width, m_name);
+	m_renderer = std::make_shared<Renderer>();
 }
 
-void application::init()
+void Application::init()
 {
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
@@ -38,38 +42,72 @@ void application::init()
 		std::cout << "Error!" << std::endl;
 	}
 
+	// Set mouse callback
+
+
 #ifdef _DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, NULL, GL_TRUE);
 #endif
-
 	// Set the viewport
 	int width, height;
-	glfwSetFramebufferSizeCallback(window->get(), framebuffer_size_callback);
-	glfwGetFramebufferSize(window->get(), &width, &height);
-	framebuffer_size_callback(window->get(), width, height);
+	glfwSetFramebufferSizeCallback(m_window->get(), framebuffer_size_callback);
+	glfwGetFramebufferSize(m_window->get(), &width, &height);
+	framebuffer_size_callback(m_window->get(), width, height);
 
-	renderer->init();
+	m_renderer->init();
 }
 
-void application::run()
+void Application::update()
+{
+	float currentFrame = glfwGetTime();
+	m_deltaTime = currentFrame - m_lastFrame;
+	m_lastFrame = currentFrame;
+
+	// Update renderer
+	m_renderer->update(m_window, m_deltaTime);
+
+	// Input
+	m_processInput();
+
+}
+
+void Application::run()
 {
 	init();
 
 	/* Loop until the user closes the window */
-	while (!window->shouldClose())
+	while (!m_window->shouldClose())
 	{
+		/* Update */
+		update();
+
 		/* Render here */
-		renderer->draw();
+		m_renderer->draw(m_window);
 
 		/* Swap front and back buffers */
-		glfwSwapBuffers(window->get());
+		glfwSwapBuffers(m_window->get());
 
 		/* Poll for and process events */
 		glfwPollEvents();
 	}
 
 	glfwTerminate();
+}
+
+void Application::m_processInput()
+{
+	//if(glfwGetKey(m_window->get(), GLFW_KEY_W) == GLFW_PRESS)
+	//	std::cout << "W" << std::endl;
+	//if (glfwGetKey(m_window->get(), GLFW_KEY_S) == GLFW_PRESS)
+	//		std::cout << "S" << std::endl;
+	//if (glfwGetKey(m_window->get(), GLFW_KEY_A) == GLFW_PRESS)
+	//		std::cout << "A" << std::endl;
+	//if (glfwGetKey(m_window->get(), GLFW_KEY_D) == GLFW_PRESS)
+	//		std::cout << "D" << std::endl;
+	// close window
+	if (glfwGetKey(m_window->get(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(m_window->get(), true);
 }

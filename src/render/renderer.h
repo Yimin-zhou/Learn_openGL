@@ -1,6 +1,8 @@
 #pragma once
 #include "material/shader.h"
 #include "model/model.h"
+#include "camera/camera.h"
+#include "util/window.h"
 
 #include <string>
 #include <vector>
@@ -11,7 +13,8 @@ public:
 	Renderer();
 
 	void init();
-	void draw();
+	void update(std::shared_ptr<Window> window, float deltaTime);
+	void draw(std::shared_ptr<Window> window);
 
 public:
 	// model path
@@ -19,4 +22,5 @@ public:
 
 private:
 	std::vector<Model> m_models;
+	Camera m_camera;
 };

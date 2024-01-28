@@ -40,7 +40,7 @@ public:
 	Mesh(Mesh&& other) noexcept;
 	Mesh& operator=(Mesh&& other) noexcept;
 
-	void draw() const;
+	void draw(const glm::mat4& modelMatrix, const glm::mat4& viewProjectionMatrix) const;
 
 private:
 	uint32_t m_vao;

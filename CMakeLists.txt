@@ -50,23 +50,28 @@ add_executable(OpenGL_Render
     ${CORE_SOURCES} 
     ${UTIL_SOURCES}
     ${RENDER_SOURCES}
- "vendor/stb_image/stb_iamge.cpp" "src/material/texture.h" "src/material/texture.cpp")
+ "vendor/stb_image/stb_iamge.cpp" "src/material/texture.h" "src/material/texture.cpp" "src/camera/camera.cpp")
 
 # Copy shader files
 set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/shader")
 set(SHADER_DEST_DIR "${CMAKE_BINARY_DIR}/shader")
-file(MAKE_DIRECTORY ${SHADER_DEST_DIR})
-add_custom_command(TARGET OpenGL_Render PRE_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${SHADER_SOURCE_DIR} ${SHADER_DEST_DIR})
+add_custom_target(CopyShaders ALL
+    COMMAND ${CMAKE_COMMAND} -E echo "Copying shaders..."
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADER_SOURCE_DIR} ${SHADER_DEST_DIR}
+    COMMENT "Shaders copied to build directory."
+)
 
 # Copy res files
-set(RES_SOURCE_DIR "${CMAKE_SOURCE_DIR}/res")
-set(RES_DEST_DIR "${CMAKE_BINARY_DIR}/res")
-file(MAKE_DIRECTORY ${RES_DEST_DIR})
-add_custom_command(TARGET OpenGL_Render PRE_BUILD
-				   COMMAND ${CMAKE_COMMAND} -E copy_directory
-					   ${RES_SOURCE_DIR} ${RES_DEST_DIR})
+set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/res")
+set(SHADER_DEST_DIR "${CMAKE_BINARY_DIR}/res")
+add_custom_target(CopyRes ALL
+    COMMAND ${CMAKE_COMMAND} -E echo "Copying res..."
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADER_SOURCE_DIR} ${SHADER_DEST_DIR}
+    COMMENT "res copied to build directory."
+)
+
+add_dependencies(OpenGL_Render CopyShaders)
+add_dependencies(OpenGL_Render CopyRes)
 
 # Link libraries
 target_link_libraries(OpenGL_Render OpenGL::GL glfw libglew_static) 

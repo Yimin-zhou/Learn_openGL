@@ -5,11 +5,18 @@ Material::Material()
 	m_generateShaders();
 }
 
-void Material::use() const 
+void Material::use(const glm::mat4& modelMatrix, const glm::mat4& viewProjectionMatrix) const
 {
 	m_shader->bind();
+
+	// Set matrices
+	m_shader->setUniform("modelMatrix", modelMatrix);
+	m_shader->setUniform("viewProjectionMatrix", viewProjectionMatrix);
+
 	// Set material properties
 	m_shader->setUniform("diffuse", glm::vec4(pbrParameter.diffuse, 1.0f));
+
+	// Set textures
 	pbrParameter.albedoMap->bind(0);
 	m_shader->setUniform("albedoMap", 0);
 
