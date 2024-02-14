@@ -40,7 +40,14 @@ public:
 	Mesh(Mesh&& other) noexcept;
 	Mesh& operator=(Mesh&& other) noexcept;
 
-	void draw(const glm::mat4& modelMatrix, const glm::mat4& viewProjectionMatrix) const;
+	uint32_t getVao() const { return m_vao; }
+	uint32_t getVbo() const { return m_vbo; }
+	uint32_t getEbo() const { return m_ebo; }
+	const std::vector<MeshEntry>& getEntries() const { return m_entries; }
+	const std::vector<Material>& getMaterials() const { return m_materials; }
+
+	//use material with index materialIndex
+	void useMaterial(int materialIndex, const glm::mat4& modelMatrix, const glm::mat4& projectionMatrix) const;
 
 private:
 	uint32_t m_vao;

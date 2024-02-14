@@ -12,17 +12,21 @@ class Model
 public:
 	Model(const std::filesystem::path& path);
 
-	void draw();
+	//void draw();
 
 	void setPosition(const glm::vec3& position);
 	void setRotation(const glm::vec3& rotation);
 	void setScale(const glm::vec3& scale);
 
-	void setViewProjectionMatrix(const glm::mat4& viewProjectionMatrix);
-
+	const glm::mat4& getModelMatrix() { return m_modelMatrix; }
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();
 	glm::vec3 getScale();
+
+	// returns the meshes reference
+	int getMeshCount() { return m_meshes.size(); }
+	const std::vector<Mesh>& getMeshes() { return m_meshes; }
+	const std::vector<Material>& getMaterials() { return m_materials; }
 
 private:
 	std::vector<Mesh> m_meshes;
@@ -32,7 +36,6 @@ private:
 	glm::vec3 m_rotation;
 	glm::vec3 m_scale;
 	glm::mat4 m_modelMatrix;
-	glm::mat4 m_viewProjectionMatrix;
 
 private:
 	void m_loadMesh(const std::filesystem::path& filePath);

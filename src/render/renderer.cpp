@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include "renderer.h"
 #include "util/config.h"
 
@@ -34,8 +36,26 @@ void Renderer::draw(std::shared_ptr<Window> window)
 
 	for (auto& model : m_models)
 	{
-		model.setViewProjectionMatrix(m_camera.getProjectionMatrix(window) * m_camera.getViewMatrix());
-		model.draw();
+		for (const auto& mesh : model.getMeshes())
+		{
+			glBindVertexArray(mesh.getVao());
+			for (const auto& entry : mesh.getEntries())
+			{
+				int materialIndex = entry.materialIndex;
+				if (materialIndex == -1)
+				{
+					materialIndex = 0;
+				}
+				mesh.useMaterial(materialIndex,model.getModelMatrix(), m_camera.getProjectionMatrix(window));
+
+				glDrawElementsBaseVertex(GL_TRIANGLES,
+					entry.numIndices,
+					GL_UNSIGNED_INT,
+					(void*)(sizeof(uint32_t) * entry.baseIndex),
+					entry.baseVertex);
+			}
+			glBindVertexArray(0);
+		}
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

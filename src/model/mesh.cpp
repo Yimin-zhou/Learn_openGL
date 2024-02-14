@@ -29,6 +29,11 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& ind
 	glBindVertexArray(0);
 }
 
+void Mesh::useMaterial(int materialIndex, const glm::mat4& modelMatrix, const glm::mat4& projectionMatrix) const
+{
+	m_materials[materialIndex].use(modelMatrix, projectionMatrix);
+}
+
 Mesh::~Mesh() 
 {
 	glDeleteVertexArrays(1, &m_vao);
@@ -64,26 +69,5 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
 		other.m_ebo = 0;
 	}
 	return *this;
-}
-
-void Mesh::draw(const glm::mat4& modelMatrix, const glm::mat4& viewProjectionMatrix) const
-{
-	glBindVertexArray(m_vao);
-	for (const auto& entry : m_entries) 
-	{
-		int materialIndex = entry.materialIndex;
-		if (materialIndex == -1)
-		{
-			materialIndex = 0;
-		}
-		m_materials[materialIndex].use(modelMatrix, viewProjectionMatrix);
-
-		glDrawElementsBaseVertex(GL_TRIANGLES,
-			entry.numIndices,
-			GL_UNSIGNED_INT,
-			(void*)(sizeof(uint32_t) * entry.baseIndex),
-			entry.baseVertex);
-	}
-	glBindVertexArray(0);
 }
 

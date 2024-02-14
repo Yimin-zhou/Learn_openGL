@@ -7,17 +7,9 @@
 #include "material/texture.h"
 
 Model::Model(const std::filesystem::path& path) :
-	m_modelMatrix(1.0f), m_viewProjectionMatrix(1.0f), m_position(0.0f), m_rotation(0.0f), m_scale(1.0f)
+	m_modelMatrix(1.0f), m_position(0.0f), m_rotation(0.0f), m_scale(1.0f)
 {
 	m_loadMesh(path);
-}
-
-void Model::draw()
-{
-	for (int i = 0; i < m_meshes.size(); i++)
-	{
-		m_meshes[i].draw(m_modelMatrix, m_viewProjectionMatrix);
-	}
 }
 
 void Model::setPosition(const glm::vec3& position)
@@ -36,11 +28,6 @@ void Model::setScale(const glm::vec3& scale)
 {
 	m_scale = scale;
 	m_updateModelMatrix();
-}
-
-void Model::setViewProjectionMatrix(const glm::mat4& viewProjectionMatrix)
-{
-	m_viewProjectionMatrix = viewProjectionMatrix;
 }
 
 glm::vec3 Model::getPosition()

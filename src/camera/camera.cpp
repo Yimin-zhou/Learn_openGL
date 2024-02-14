@@ -39,6 +39,7 @@ void Camera::update(std::shared_ptr<Window> window, float deltaTime)
 
 
 	m_processMouseMovement(window);
+
 }
 
 void Camera::m_updateCameraVectors()
