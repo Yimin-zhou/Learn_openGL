@@ -46,7 +46,7 @@ void Renderer::draw(std::shared_ptr<Window> window)
 				{
 					materialIndex = 0;
 				}
-				mesh.useMaterial(materialIndex,model.getModelMatrix(), m_camera.getProjectionMatrix(window));
+				mesh.useMaterial(materialIndex,model.getModelMatrix(), m_camera.getProjectionMatrix(window) * m_camera.getViewMatrix());
 
 				glDrawElementsBaseVertex(GL_TRIANGLES,
 					entry.numIndices,

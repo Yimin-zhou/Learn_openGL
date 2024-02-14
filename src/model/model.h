@@ -12,7 +12,6 @@ class Model
 public:
 	Model(const std::filesystem::path& path);
 
-	//void draw();
 
 	void setPosition(const glm::vec3& position);
 	void setRotation(const glm::vec3& rotation);
