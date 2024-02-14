@@ -12,6 +12,8 @@ public:
 
 	void update(std::shared_ptr<Window> window, float deltaTime);
 
+	void setAspectRatio(float aspectRatio) { m_aspectRatio = aspectRatio; }
+
 	glm::mat4 getViewMatrix() const;
 	glm::mat4 getProjectionMatrix(std::shared_ptr<Window>) const;
 
@@ -33,6 +35,7 @@ private:
 	bool m_firstMouse;
 
 	float m_fov;
+	float m_aspectRatio;
 	float m_nearPlane;
 	float m_farPlane;
 

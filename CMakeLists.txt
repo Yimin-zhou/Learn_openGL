@@ -6,6 +6,10 @@ set(CMAKE_CXX_STANDARD 20)
 # Add subdirectories
 add_subdirectory(vendor/glfw)
 add_subdirectory(vendor/glew)
+# Add ImGui source files
+set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/vendor/imgui)
+file(GLOB IMGUI_SOURCES ${IMGUI_DIR}/*.cpp ${IMGUI_DIR}/*.h)
+list(APPEND IMGUI_SOURCES ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp)
 
 # Include directories
 include_directories(vendor/glfw/include)
@@ -13,10 +17,17 @@ include_directories(vendor/glew/include)
 include_directories(vendor/glm)
 include_directories(vendor/tinyobjloader)
 include_directories(vendor/stb_image)
+include_directories(vendor/imgui)
 include_directories(src)
+include_directories(${IMGUI_DIR})
+include_directories(${IMGUI_DIR}/backends)
 
 # OpenGL package
 find_package(OpenGL 4.3 REQUIRED)
+
+# Add ImGui as a library
+add_library(ImGui STATIC ${IMGUI_SOURCES})
+target_include_directories(ImGui PUBLIC ${IMGUI_DIR} ${IMGUI_DIR}/backends)
 
 # Core and utility source files
 set(CORE_SOURCES
@@ -35,14 +46,16 @@ set(CORE_SOURCES
   "src/material/material.h" 
   "src/model/mesh.h" 
   "src/model/mesh.cpp" 
-  "src/material/material.cpp" "src/material/texture.h" "src/material/texture.cpp")
+  "src/material/material.cpp" 
+  "src/material/texture.h" 
+  "src/material/texture.cpp")
 
 set(UTIL_SOURCES
     "src/util/window.cpp" 
     "src/util/window.h" 
     "src/util/config.h"
   
- )
+  "src/render/scene.h" "src/render/scene.cpp")
 
 # Add executable
 add_executable(OpenGL_Render 
@@ -50,7 +63,10 @@ add_executable(OpenGL_Render
     ${CORE_SOURCES} 
     ${UTIL_SOURCES}
     ${RENDER_SOURCES}
- "vendor/stb_image/stb_iamge.cpp" "src/material/texture.h" "src/material/texture.cpp" "src/camera/camera.cpp")
+ "vendor/stb_image/stb_iamge.cpp" 
+ "src/material/texture.h" 
+ "src/material/texture.cpp" 
+ "src/camera/camera.cpp")
 
 # Copy shader files
 set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/shader")
@@ -74,4 +90,4 @@ add_dependencies(OpenGL_Render CopyShaders)
 add_dependencies(OpenGL_Render CopyRes)
 
 # Link libraries
-target_link_libraries(OpenGL_Render OpenGL::GL glfw libglew_static) 
+target_link_libraries(OpenGL_Render OpenGL::GL glfw libglew_static ImGui) 

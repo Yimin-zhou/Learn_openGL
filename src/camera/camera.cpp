@@ -6,7 +6,7 @@
 Camera::Camera(glm::vec3 position, float yaw, float pitch, float movementSpeed, float mouseSensitivity)
 	: m_position(position), m_front(glm::vec3(0.0f, 0.0f, -1.0f)), m_worldUp(glm::vec3(0.0f, 1.0f, 0.0f)),
 	m_yaw(yaw), m_pitch(pitch), m_movementSpeed(movementSpeed), m_mouseSensitivity(mouseSensitivity), 
-	m_fov(60.0f), m_nearPlane(0.01f), m_farPlane(1000.0f), m_firstMouse(true), m_lastX(0.0f), m_lastY(0.0f), m_isMouseCaptured(false)
+	m_fov(60.0f), m_aspectRatio(16.0f/9.0f), m_nearPlane(0.01f), m_farPlane(1000.0f), m_firstMouse(true), m_lastX(0.0f), m_lastY(0.0f), m_isMouseCaptured(false)
 {
 	m_updateCameraVectors();
 }
@@ -113,5 +113,5 @@ glm::mat4 Camera::getViewMatrix() const
 glm::mat4 Camera::getProjectionMatrix(std::shared_ptr<Window> window) const
 {
 
-	return glm::perspective(glm::radians(m_fov), 16.0f / 9.0f, m_nearPlane, m_farPlane);
+	return glm::perspective(glm::radians(m_fov), m_aspectRatio, m_nearPlane, m_farPlane);
 }

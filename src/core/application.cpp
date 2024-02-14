@@ -42,14 +42,13 @@ void Application::init()
 		std::cout << "Error!" << std::endl;
 	}
 
-	// Set mouse callback
-
 
 #ifdef _DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
-	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, NULL, GL_TRUE);
+	glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 0, NULL, GL_FALSE);
+
 #endif
 	// Set the viewport
 	int width, height;
@@ -58,6 +57,8 @@ void Application::init()
 	framebuffer_size_callback(m_window->get(), width, height);
 
 	m_renderer->init();
+	m_renderer->resize(m_window); // initial resize to set framebuffer size
+	m_window->initImGui();
 }
 
 void Application::update()
@@ -85,7 +86,16 @@ void Application::run()
 		update();
 
 		/* Render here */
+		if (m_window->shouldResize())
+		{
+			m_renderer->resize(m_window);
+			m_window->setShouldResize(false);
+		}
+		m_renderer->setCameraAspectRatio(m_window->getRenderWindowAspectRatio());
 		m_renderer->draw(m_window);
+
+		// imgui
+		m_window->drawImGui(m_renderer->getFinalTexture());
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(m_window->get());
@@ -94,6 +104,7 @@ void Application::run()
 		glfwPollEvents();
 	}
 
+	m_window->shutdownImGui();
 	glfwTerminate();
 }
 
