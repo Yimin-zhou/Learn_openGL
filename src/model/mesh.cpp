@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include <GL/glew.h>
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const std::vector<MeshEntry>& meshEntries, const std::vector<Material>& materials)
 	: m_entries(meshEntries), m_materials(materials),
@@ -27,11 +28,6 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& ind
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
 
 	glBindVertexArray(0);
-}
-
-void Mesh::useMaterial(int materialIndex, const glm::mat4& modelMatrix, const glm::mat4& projectionMatrix) const
-{
-	m_materials[materialIndex].use(modelMatrix, projectionMatrix);
 }
 
 Mesh::~Mesh() 

@@ -1,9 +1,10 @@
 #pragma once
 
 #include <memory>
-#include "render/renderer.h"
 
+#include "render/renderer.h"
 #include "util/window.h"
+#include "util/ImGuiManager.h"
 
 class Application 
 {
@@ -20,6 +21,7 @@ private:
     const char* m_name;
     std::shared_ptr<Window> m_window;
     std::shared_ptr<Renderer> m_renderer;
+    std::shared_ptr<ImGuiManager> m_imGuiManager;
 
     // Input handling methods
     float m_deltaTime, m_lastFrame;

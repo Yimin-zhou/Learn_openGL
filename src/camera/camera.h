@@ -15,7 +15,7 @@ public:
 	void setAspectRatio(float aspectRatio) { m_aspectRatio = aspectRatio; }
 
 	glm::mat4 getViewMatrix() const;
-	glm::mat4 getProjectionMatrix(std::shared_ptr<Window>) const;
+	glm::mat4 getProjectionMatrix() const;
 
 private:
 	glm::vec3 m_position;

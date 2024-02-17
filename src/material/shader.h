@@ -1,5 +1,4 @@
 #pragma once
-#include <GL/glew.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -7,6 +6,7 @@
 #include <filesystem>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 struct ShaderLoadingException : public std::runtime_error
 {
@@ -47,7 +47,7 @@ public:
 	ShaderBuilder(const ShaderBuilder&) = delete;
 	~ShaderBuilder();
 
-	ShaderBuilder& addStage(GLenum shaderStage, const std::filesystem::path& shaderFile);
+	ShaderBuilder& addStage(uint32_t shaderStage, const std::filesystem::path& shaderFile);
 	std::shared_ptr<Shader> build();
 
 private:
@@ -55,5 +55,18 @@ private:
 
 private:
 	std::vector<uint32_t> m_shaders;
+};
+
+class ShaderManager
+{
+public:
+	ShaderManager() = default;
+
+	void buildShader(const std::string& name, const std::filesystem::path& vertexPath, const std::filesystem::path& fragPath);
+	std::shared_ptr<Shader> getShader(const std::string& name) const;
+
+private:
+	std::unordered_map<std::string, std::shared_ptr<Shader>> m_shaders;
+
 };
 

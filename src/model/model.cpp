@@ -76,24 +76,14 @@ void Model::m_loadMesh(const std::filesystem::path& filePath)
 	{
 		std::cerr << "Error: " << err << std::endl;
 	}
-	// TODO: create default materials
-	if (tinyMaterials.empty())
+
+	for (const auto& mat : tinyMaterials)
 	{
 		Material material;
-		material.pbrParameter.diffuse = glm::vec3(1.0f);
+		material.pbrParameter.diffuse = glm::vec3(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2]);
+		material.pbrParameter.albedoMap = std::make_shared<Texture>(parentPath / mat.diffuse_texname);
 		// Add more material properties here as needed
 		m_materials.push_back(material);
-	}
-	else
-	{
-		for (const auto& mat : tinyMaterials)
-		{
-			Material material;
-			material.pbrParameter.diffuse = glm::vec3(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2]);
-			material.pbrParameter.albedoMap = std::make_shared<Texture>(parentPath / mat.diffuse_texname);
-			// Add more material properties here as needed
-			m_materials.push_back(material);
-		}
 	}
 
 	for (const tinyobj::shape_t& shape : shapes) 

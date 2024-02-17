@@ -1,14 +1,14 @@
+#include <iostream>
+
 #include "material.h"
 
 Material::Material()
 {
-	m_generateShaders();
 }
+
 
 void Material::use(const glm::mat4& modelMatrix, const glm::mat4& viewProjectionMatrix) const
 {
-	m_shader->bind();
-
 	// Set matrices
 	m_shader->setUniform("modelMatrix", modelMatrix);
 	m_shader->setUniform("viewProjectionMatrix", viewProjectionMatrix);
@@ -22,15 +22,48 @@ void Material::use(const glm::mat4& modelMatrix, const glm::mat4& viewProjection
 
 }
 
+void Material::setShader(std::shared_ptr<Shader> shader)
+{
+	m_shader = shader;
+	m_shader->bind();
+}
+
 std::shared_ptr<Shader> Material::getShader() const
 {
 	return m_shader;
 }
 
-void Material::m_generateShaders()
+void Material::setUniform(const std::string& name, float value)
 {
-	ShaderBuilder lambertBuilder;
-	lambertBuilder.addStage(GL_VERTEX_SHADER, vertexShaderPath);
-	lambertBuilder.addStage(GL_FRAGMENT_SHADER, fragmentShaderPath);
-	m_shader = lambertBuilder.build();
+	m_shader->setUniform(name, value);
+}
+
+void Material::setUniform(const std::string& name, int value)
+{
+	m_shader->setUniform(name, value);
+}
+
+void Material::setUniform(const std::string& name, const glm::vec2& value)
+{
+	m_shader->setUniform(name, value);
+}
+
+void Material::setUniform(const std::string& name, const glm::vec3& value)
+{
+	m_shader->setUniform(name, value);
+}
+
+void Material::setUniform(const std::string& name, const glm::vec4& value)
+{
+	m_shader->setUniform(name, value);
+}
+
+void Material::setUniform(const std::string& name, const glm::mat3& value)
+{
+	m_shader->setUniform(name, value);
+}
+
+void Material::setUniform(const std::string& name, const glm::mat4& value)
+{
+	m_shader->setUniform(name, value);
 }

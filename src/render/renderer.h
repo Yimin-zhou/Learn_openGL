@@ -1,8 +1,11 @@
 #pragma once
+#include <GL/glew.h>
+
+#include "util/window.h"
 #include "material/shader.h"
 #include "model/model.h"
 #include "camera/camera.h"
-#include "util/window.h"
+#include "render/light/LightManager.h"
 
 #include <string>
 #include <vector>
@@ -14,12 +17,18 @@ public:
 
 	void init();
 	void update(std::shared_ptr<Window> window, float deltaTime);
-	void draw(std::shared_ptr<Window> window);
+	void draw(glm::vec2 renderSize);
 
-	void resize(std::shared_ptr<Window> window);
+	void resize(glm::vec2 renderSize);
 
 	void setCameraAspectRatio(float aspectRatio);
 	uint32_t getFinalTexture() { return m_finalTexture; }
+
+	// camera
+	Camera& getCamera() { return m_camera; }
+
+	// lightings
+	LightManager& getLightManager() { return m_lightManager; }
 
 public:
 	// model path
@@ -37,5 +46,7 @@ private:
 	uint32_t m_depthBuffer;
 
 	std::vector<Model> m_models;
+	ShaderManager m_shaderManager;
+	LightManager m_lightManager;
 	Camera m_camera;
 };

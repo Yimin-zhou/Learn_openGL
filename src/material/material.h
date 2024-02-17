@@ -18,7 +18,6 @@ struct PBRParameter
 	std::shared_ptr<Texture> albedoMap;
 	//std::shared_ptr<Texture> specularMap;
 	//std::shared_ptr<Texture> normalMap;
-	//std::shared_ptr<Texture> heightMap;
 };
 
 
@@ -29,20 +28,20 @@ public:
 
 	void use(const glm::mat4& modelMatrix, const glm::mat4& viewProjectionMatrix) const;
 
-	// get the shader
+	void setShader(std::shared_ptr<Shader> shader);
 	std::shared_ptr<Shader> getShader() const;
 
-	// Add methods for setting textures, if necessary
+	void setUniform(const std::string& name, float value);
+	void setUniform(const std::string& name, int value);
+	void setUniform(const std::string& name, const glm::vec2& value);
+	void setUniform(const std::string& name, const glm::vec3& value);
+	void setUniform(const std::string& name, const glm::vec4& value);
+	void setUniform(const std::string& name, const glm::mat3& value);
+	void setUniform(const std::string& name, const glm::mat4& value);
 
 public:
-	// shader path
-	std::filesystem::path vertexShaderPath = "shader/lambert_vert.glsl";
-	std::filesystem::path fragmentShaderPath = "shader/lambert_frag.glsl";
-
 	PBRParameter pbrParameter;
 
-private:
-	void m_generateShaders();
 
 private:
 	std::shared_ptr<Shader> m_shader;

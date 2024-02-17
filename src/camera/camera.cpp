@@ -13,30 +13,31 @@ Camera::Camera(glm::vec3 position, float yaw, float pitch, float movementSpeed, 
 
 void Camera::update(std::shared_ptr<Window> window, float deltaTime)
 {
-	if (glfwGetKey(window->get(), GLFW_KEY_W) == GLFW_PRESS)
-		m_processKeyboard(deltaTime, true, false, false, false, false, false);
-	if (glfwGetKey(window->get(), GLFW_KEY_S) == GLFW_PRESS)
-		m_processKeyboard(deltaTime, false, true, false, false, false, false);
-	if (glfwGetKey(window->get(), GLFW_KEY_A) == GLFW_PRESS)
-		m_processKeyboard(deltaTime, false, false, true, false, false, false);
-	if (glfwGetKey(window->get(), GLFW_KEY_D) == GLFW_PRESS)
-		m_processKeyboard(deltaTime, false, false, false, true, false, false);
-	if (glfwGetKey(window->get(), GLFW_KEY_E) == GLFW_PRESS)
-		m_processKeyboard(deltaTime, false, false, false, false, true, false);
-	if (glfwGetKey(window->get(), GLFW_KEY_Q) == GLFW_PRESS)
-		m_processKeyboard(deltaTime, false, false, false, false, false, true);
-	// capture mouse
 	if (glfwGetMouseButton(window->get(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 	{
+		if (glfwGetKey(window->get(), GLFW_KEY_W) == GLFW_PRESS)
+			m_processKeyboard(deltaTime, true, false, false, false, false, false);
+		if (glfwGetKey(window->get(), GLFW_KEY_S) == GLFW_PRESS)
+			m_processKeyboard(deltaTime, false, true, false, false, false, false);
+		if (glfwGetKey(window->get(), GLFW_KEY_A) == GLFW_PRESS)
+			m_processKeyboard(deltaTime, false, false, true, false, false, false);
+		if (glfwGetKey(window->get(), GLFW_KEY_D) == GLFW_PRESS)
+			m_processKeyboard(deltaTime, false, false, false, true, false, false);
+		if (glfwGetKey(window->get(), GLFW_KEY_E) == GLFW_PRESS)
+			m_processKeyboard(deltaTime, false, false, false, false, true, false);
+		if (glfwGetKey(window->get(), GLFW_KEY_Q) == GLFW_PRESS)
+			m_processKeyboard(deltaTime, false, false, false, false, false, true);
+		// capture mouse
+
 		glfwSetInputMode(window->get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		m_isMouseCaptured = true;
 	}
+	
 	else
 	{
 		glfwSetInputMode(window->get(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		m_isMouseCaptured = false;
 	}
-
 
 	m_processMouseMovement(window);
 
@@ -111,7 +112,7 @@ glm::mat4 Camera::getViewMatrix() const
 	return glm::lookAt(m_position, m_position + m_front, m_up);
 }
 
-glm::mat4 Camera::getProjectionMatrix(std::shared_ptr<Window> window) const
+glm::mat4 Camera::getProjectionMatrix() const
 {
 
 	return glm::perspective(glm::radians(m_fov), m_aspectRatio, m_nearPlane, m_farPlane);

@@ -32,6 +32,7 @@ Application::Application(int h, int w, const char* name)
 {
 	m_window = std::make_shared<Window>(m_height, m_width, m_name);
 	m_renderer = std::make_shared<Renderer>();
+	m_imGuiManager = std::make_shared<ImGuiManager>(m_window, m_renderer);
 }
 
 void Application::init()
@@ -57,8 +58,8 @@ void Application::init()
 	framebuffer_size_callback(m_window->get(), width, height);
 
 	m_renderer->init();
-	m_renderer->resize(m_window); // initial resize to set framebuffer size
-	m_window->initImGui();
+	m_renderer->resize(m_window->getSize()); // initial resize to set framebuffer size
+	m_imGuiManager->init();
 }
 
 void Application::update()
@@ -86,16 +87,16 @@ void Application::run()
 		update();
 
 		/* Render here */
-		if (m_window->shouldResize())
+		if (m_imGuiManager->shouldResize())
 		{
-			m_renderer->resize(m_window);
-			m_window->setShouldResize(false);
+			m_renderer->resize(m_imGuiManager->getRenderSize());
+			m_imGuiManager->setShouldResize(false);
 		}
-		m_renderer->setCameraAspectRatio(m_window->getRenderWindowAspectRatio());
-		m_renderer->draw(m_window);
+		m_renderer->setCameraAspectRatio(m_imGuiManager->getRenderWindowAspectRatio());
+		m_renderer->draw(m_imGuiManager->getRenderSize());
 
 		// imgui
-		m_window->drawImGui(m_renderer->getFinalTexture());
+		m_imGuiManager->draw(m_renderer->getFinalTexture());
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(m_window->get());
@@ -104,7 +105,7 @@ void Application::run()
 		glfwPollEvents();
 	}
 
-	m_window->shutdownImGui();
+	m_imGuiManager->shutdown();
 	glfwTerminate();
 }
 

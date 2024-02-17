@@ -10,6 +10,9 @@ add_subdirectory(vendor/glew)
 set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/vendor/imgui)
 file(GLOB IMGUI_SOURCES ${IMGUI_DIR}/*.cpp ${IMGUI_DIR}/*.h)
 list(APPEND IMGUI_SOURCES ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp)
+# Add ImGuizmo source files
+set(IMGUIZMO_DIR ${CMAKE_SOURCE_DIR}/vendor/ImGuizmo)
+file(GLOB IMGUIZMO_SOURCES ${IMGUIZMO_DIR}/*.cpp ${IMGUIZMO_DIR}/*.h)
 
 # Include directories
 include_directories(vendor/glfw/include)
@@ -18,6 +21,7 @@ include_directories(vendor/glm)
 include_directories(vendor/tinyobjloader)
 include_directories(vendor/stb_image)
 include_directories(vendor/imgui)
+include_directories(vendor/ImGuizmo)
 include_directories(src)
 include_directories(${IMGUI_DIR})
 include_directories(${IMGUI_DIR}/backends)
@@ -29,6 +33,10 @@ find_package(OpenGL 4.3 REQUIRED)
 add_library(ImGui STATIC ${IMGUI_SOURCES})
 target_include_directories(ImGui PUBLIC ${IMGUI_DIR} ${IMGUI_DIR}/backends)
 
+# Add ImGuizmo as a library
+add_library(ImGuizmo STATIC ${IMGUIZMO_SOURCES})
+target_include_directories(ImGuizmo PUBLIC ${IMGUIZMO_DIR})
+
 # Core and utility source files
 set(CORE_SOURCES
 
@@ -36,7 +44,7 @@ set(CORE_SOURCES
     "src/render/renderer.h"
     "src/core/application.cpp" 
     "src/core/application.h"
-  "src/material/texture.h")
+)
 
  set(RENDER_SOURCES
     "src/model/model.h"
@@ -46,16 +54,30 @@ set(CORE_SOURCES
   "src/material/material.h" 
   "src/model/mesh.h" 
   "src/model/mesh.cpp" 
+  "src/material/texture.h"
   "src/material/material.cpp" 
   "src/material/texture.h" 
-  "src/material/texture.cpp")
+  "src/material/texture.cpp"
+    "src/camera/camera.h"
+    "src/camera/camera.cpp"
+    "src/render/light/light.h"
+    "src/render/light/light.cpp"
+    "src/render/light/directionalLight.h"
+    "src/render/light/directionalLight.cpp"
+    "src/render/light/pointLight.h"
+    "src/render/light/pointLight.cpp"
+    "src/render/light/spotLight.h"
+    "src/render/light/spotLight.cpp"
+    "src/render/light/lightManager.h"
+    "src/render/light/lightManager.cpp"
+ )
 
 set(UTIL_SOURCES
     "src/util/window.cpp" 
     "src/util/window.h" 
     "src/util/config.h"
   
-  "src/render/scene.h" "src/render/scene.cpp")
+  "src/render/scene.h" "src/render/scene.cpp" "src/util/imGuiManager.h" "src/util/imGuiManager.cpp")
 
 # Add executable
 add_executable(OpenGL_Render 
@@ -90,4 +112,4 @@ add_dependencies(OpenGL_Render CopyShaders)
 add_dependencies(OpenGL_Render CopyRes)
 
 # Link libraries
-target_link_libraries(OpenGL_Render OpenGL::GL glfw libglew_static ImGui) 
+target_link_libraries(OpenGL_Render OpenGL::GL glfw libglew_static ImGui ImGuizmo) 

@@ -5,6 +5,8 @@
 #include <string>
 #include <format>
 
+#include <GL/glew.h>
+
 #include "shader.h"
 
 static constexpr uint32_t invalid = 0xFFFFFFFF;
@@ -113,7 +115,7 @@ ShaderBuilder::~ShaderBuilder()
 	freeShaders();
 }
 
-ShaderBuilder& ShaderBuilder::addStage(GLenum shaderType, const std::filesystem::path& shaderFile)
+ShaderBuilder& ShaderBuilder::addStage(uint32_t shaderType, const std::filesystem::path& shaderFile)
 {
 	if (!std::filesystem::exists(shaderFile)) 
 	{
@@ -221,3 +223,15 @@ static bool checkProgramErrors(uint32_t program)
 	}
 }
 
+void ShaderManager::buildShader(const std::string& name, const std::filesystem::path& vertexPath, const std::filesystem::path& fragPath)
+{
+	ShaderBuilder defaultShaderBuilder;
+	defaultShaderBuilder.addStage(GL_VERTEX_SHADER, vertexPath);
+	defaultShaderBuilder.addStage(GL_FRAGMENT_SHADER, fragPath);
+	m_shaders[name] = defaultShaderBuilder.build();
+}
+
+std::shared_ptr<Shader> ShaderManager::getShader(const std::string& name) const
+{
+	return m_shaders.at(name);
+}
