@@ -14,6 +14,10 @@ list(APPEND IMGUI_SOURCES ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp ${IMGUI_D
 set(IMGUIZMO_DIR ${CMAKE_SOURCE_DIR}/vendor/ImGuizmo)
 file(GLOB IMGUIZMO_SOURCES ${IMGUIZMO_DIR}/*.cpp ${IMGUIZMO_DIR}/*.h)
 
+# Add ImGuiFileDialog source files
+set(IMGUIFILEDIALOG_DIR ${CMAKE_SOURCE_DIR}/vendor/ImGuiFileDialog)
+file(GLOB IMGUIFILEDIALOG_SOURCES ${IMGUIFILEDIALOG_DIR}/*.cpp ${IMGUIFILEDIALOG_DIR}/*.h)
+
 # Include directories
 include_directories(vendor/glfw/include)
 include_directories(vendor/glew/include)
@@ -25,6 +29,7 @@ include_directories(vendor/ImGuizmo)
 include_directories(src)
 include_directories(${IMGUI_DIR})
 include_directories(${IMGUI_DIR}/backends)
+include_directories(${IMGUIZMO_DIR})
 
 # OpenGL package
 find_package(OpenGL 4.3 REQUIRED)
@@ -36,6 +41,10 @@ target_include_directories(ImGui PUBLIC ${IMGUI_DIR} ${IMGUI_DIR}/backends)
 # Add ImGuizmo as a library
 add_library(ImGuizmo STATIC ${IMGUIZMO_SOURCES})
 target_include_directories(ImGuizmo PUBLIC ${IMGUIZMO_DIR})
+
+# Add ImGuiFileDialog as a library
+add_library(ImGuiFileDialog STATIC ${IMGUIFILEDIALOG_SOURCES})
+target_include_directories(ImGuiFileDialog PUBLIC ${IMGUIFILEDIALOG_DIR})
 
 # Core and utility source files
 set(CORE_SOURCES
@@ -73,11 +82,11 @@ set(CORE_SOURCES
  )
 
 set(UTIL_SOURCES
-    "src/util/window.cpp" 
-    "src/util/window.h" 
+    "src/window/window.cpp" 
+    "src/window/window.h" 
     "src/util/config.h"
   
-  "src/render/scene.h" "src/render/scene.cpp" "src/util/imGuiManager.h" "src/util/imGuiManager.cpp")
+  "src/render/scene.h" "src/render/scene.cpp" "src/window/imGuiManager.h" "src/window/imGuiManager.cpp")
 
 # Add executable
 add_executable(OpenGL_Render 
@@ -112,4 +121,4 @@ add_dependencies(OpenGL_Render CopyShaders)
 add_dependencies(OpenGL_Render CopyRes)
 
 # Link libraries
-target_link_libraries(OpenGL_Render OpenGL::GL glfw libglew_static ImGui ImGuizmo) 
+target_link_libraries(OpenGL_Render OpenGL::GL glfw libglew_static ImGui ImGuizmo ImGuiFileDialog) 

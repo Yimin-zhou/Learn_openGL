@@ -8,16 +8,22 @@
 #include "shader.h"
 #include "texture.h"
 
-struct PBRParameter
+class PBRParameter
 {
+public:
 	glm::vec3 ambient = glm::vec3(1.0f);
 	glm::vec3 diffuse = glm::vec3(1.0f);
-	glm::vec3 specular = glm::vec3(1.0f);
+	glm::vec3 roughness = glm::vec3(1.0f);
+	glm::vec3 metallic = glm::vec3(1.0f);
+	glm::vec3 ao = glm::vec3(1.0f);
+	float normalStrength = 1.0f;
 
 	// texture
 	std::shared_ptr<Texture> albedoMap;
-	//std::shared_ptr<Texture> specularMap;
-	//std::shared_ptr<Texture> normalMap;
+	std::shared_ptr<Texture> roughnessMap;
+	std::shared_ptr<Texture> metallicMap;
+	std::shared_ptr<Texture> aoMap;
+	std::shared_ptr<Texture> normalMap;
 };
 
 
@@ -26,10 +32,13 @@ class Material
 public:
 	Material();
 
-	void use(const glm::mat4& modelMatrix, const glm::mat4& viewProjectionMatrix) const;
+	void use(const glm::mat4& modelMatrix, const glm::mat4& projectionViewMatrix, const glm::vec3& viewDirection) const;
+	void ubind() const;
 
 	void setShader(std::shared_ptr<Shader> shader);
 	std::shared_ptr<Shader> getShader() const;
+
+	PBRParameter& getPBRParameter() { return pbrParameter; }
 
 	void setUniform(const std::string& name, float value);
 	void setUniform(const std::string& name, int value);
@@ -41,7 +50,6 @@ public:
 
 public:
 	PBRParameter pbrParameter;
-
 
 private:
 	std::shared_ptr<Shader> m_shader;

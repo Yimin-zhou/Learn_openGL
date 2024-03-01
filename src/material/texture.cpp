@@ -6,8 +6,18 @@
 Texture::Texture(const std::filesystem::path& path)
 	: m_filePath(path), m_textureID(0), m_localBuffer(nullptr), m_width(0), m_height(0), m_BPP(0)
 {
-	stbi_set_flip_vertically_on_load(1);
-	m_localBuffer = stbi_load(path.string().c_str(), &m_width, &m_height, &m_BPP, 4);
+	loadTextureFromFile(path.string().c_str());
+}
+
+Texture::~Texture()
+{
+	glDeleteTextures(1, &m_textureID);
+}
+
+void Texture::loadTextureFromFile(const char* path)
+{
+	stbi_set_flip_vertically_on_load(0);
+	m_localBuffer = stbi_load(path, &m_width, &m_height, &m_BPP, 4);
 
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
@@ -22,12 +32,6 @@ Texture::Texture(const std::filesystem::path& path)
 
 	if (m_localBuffer)
 		stbi_image_free(m_localBuffer);
-
-}
-
-Texture::~Texture()
-{
-	glDeleteTextures(1, &m_textureID);
 }
 
 void Texture::bind(uint32_t slot) const

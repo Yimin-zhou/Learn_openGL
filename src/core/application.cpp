@@ -72,7 +72,7 @@ void Application::update()
 	m_renderer->update(m_window, m_deltaTime);
 
 	// Input
-	m_processInput();
+	processInput();
 
 }
 
@@ -109,7 +109,7 @@ void Application::run()
 	glfwTerminate();
 }
 
-void Application::m_processInput()
+void Application::processInput()
 {
 	//if(glfwGetKey(m_window->get(), GLFW_KEY_W) == GLFW_PRESS)
 	//	std::cout << "W" << std::endl;

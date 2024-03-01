@@ -1,7 +1,7 @@
 #pragma once
 #include <GL/glew.h>
 
-#include "util/window.h"
+#include "window/window.h"
 #include "material/shader.h"
 #include "model/model.h"
 #include "camera/camera.h"
@@ -24,6 +24,14 @@ public:
 	void setCameraAspectRatio(float aspectRatio);
 	uint32_t getFinalTexture() { return m_finalTexture; }
 
+	//Shader
+	void setCurrentShader(ShaderName shaderName);
+	ShaderName getCurrentShaderName() { return m_currentShaderName; }
+	ShaderManager& getShaderManager() { return m_shaderManager; }
+
+	// models
+	std::vector<Model>& getModels() { return m_models; }
+
 	// camera
 	Camera& getCamera() { return m_camera; }
 
@@ -31,8 +39,8 @@ public:
 	LightManager& getLightManager() { return m_lightManager; }
 
 public:
-	// model path
-	std::filesystem::path modelPath = "res/models/cube.obj";
+	// scene model path 
+	std::filesystem::path modelPath = "res/models/spaceman/spaceman.obj";
 
 private:
 	// properties
@@ -45,7 +53,9 @@ private:
 	uint32_t m_finalTexture;
 	uint32_t m_depthBuffer;
 
+	// scene
 	std::vector<Model> m_models;
+	ShaderName m_currentShaderName = ShaderName::PBR;
 	ShaderManager m_shaderManager;
 	LightManager m_lightManager;
 	Camera m_camera;

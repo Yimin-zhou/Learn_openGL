@@ -1,0 +1,42 @@
+# Blender 4.0.2 MTL File: 'spaceman.blend'
+# www.blender.org
+
+newmtl Material.001
+Kd 1.00000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+Pr 0.500000
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+norm spaceman_normal.tga
+map_Kd albedo_grass.jpg
+map_Pm albedo_grass.jpg
+map_Pr albedo_grass.jpg
+map_Ka albedo_grass.jpg
+
+newmtl spaceman
+Kd 1.00000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+Pr 0.500000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+norm spaceman_normal.tga
+map_Kd spaceman_albedo.tga
+map_Pm spaceman_metallic.tga
+map_Pr spaceman_roughness.tga
+map_Ka spaceman_ao.tga
+

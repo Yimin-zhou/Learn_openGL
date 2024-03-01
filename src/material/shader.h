@@ -13,6 +13,14 @@ struct ShaderLoadingException : public std::runtime_error
 	using std::runtime_error::runtime_error;
 };
 
+enum class ShaderName
+{
+	LAMBERT,
+	PBR,
+
+	SIZE
+};
+
 class Shader
 {
 public:
@@ -22,7 +30,6 @@ public:
 	Shader(Shader&&);
 	Shader& operator=(Shader&&);
 
-public:
 	void setUniform(const std::string& name, float value);
 	void setUniform(const std::string& name, int value);
 	void setUniform(const std::string& name, const glm::vec2& value);
@@ -35,9 +42,10 @@ public:
 
 private:
 	friend class ShaderBuilder;
-
-private:
 	uint32_t m_program;
+	mutable std::unordered_map<std::string, int32_t> m_uniformLocations;
+
+	int32_t getUniformLocation(const std::string& name) const;
 };
 
 class ShaderBuilder
@@ -51,10 +59,8 @@ public:
 	std::shared_ptr<Shader> build();
 
 private:
-	void freeShaders();
-
-private:
 	std::vector<uint32_t> m_shaders;
+	void freeShaders();
 };
 
 class ShaderManager
@@ -62,11 +68,10 @@ class ShaderManager
 public:
 	ShaderManager() = default;
 
-	void buildShader(const std::string& name, const std::filesystem::path& vertexPath, const std::filesystem::path& fragPath);
-	std::shared_ptr<Shader> getShader(const std::string& name) const;
+	void buildShader(ShaderName name, const std::filesystem::path& vertexPath, const std::filesystem::path& fragPath);
+	std::shared_ptr<Shader> getShader(ShaderName name) const;
 
 private:
-	std::unordered_map<std::string, std::shared_ptr<Shader>> m_shaders;
-
+	std::unordered_map<ShaderName, std::shared_ptr<Shader>> m_shaders;
 };
 

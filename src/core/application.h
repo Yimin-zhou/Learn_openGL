@@ -3,8 +3,8 @@
 #include <memory>
 
 #include "render/renderer.h"
-#include "util/window.h"
-#include "util/ImGuiManager.h"
+#include "window/window.h"
+#include "window/ImGuiManager.h"
 
 class Application 
 {
@@ -13,7 +13,6 @@ public:
     void init();
     void update();
     void run();
-
 
 private:
     int m_height;
@@ -25,5 +24,5 @@ private:
 
     // Input handling methods
     float m_deltaTime, m_lastFrame;
-    void m_processInput();
+    void processInput();
 };

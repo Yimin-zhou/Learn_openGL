@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "util/window.h"
+#include "window/window.h"
 
 class Camera 
 {
@@ -13,6 +13,9 @@ public:
 	void update(std::shared_ptr<Window> window, float deltaTime);
 
 	void setAspectRatio(float aspectRatio) { m_aspectRatio = aspectRatio; }
+
+	glm::vec3 getPosition() const { return m_position; }
+	glm::vec3 getViewDirection() const { return m_front; }
 
 	glm::mat4 getViewMatrix() const;
 	glm::mat4 getProjectionMatrix() const;

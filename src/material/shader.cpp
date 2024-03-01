@@ -50,50 +50,43 @@ Shader& Shader::operator=(Shader&& other)
 
 void Shader::setUniform(const std::string& name, float value)
 {
-	int32_t location = glGetUniformLocation(m_program, name.c_str());
-	if(location == -1) std::cerr << "Uniform " << name << " not found" << std::endl;
+	int32_t location = getUniformLocation(name);
 	glUniform1f(location, value);
 }
 
 void Shader::setUniform(const std::string& name, int value)
 {
-	int32_t location = glGetUniformLocation(m_program, name.c_str());
-	if (location == -1) std::cerr << "Uniform " << name << " not found" << std::endl;
+	int32_t location = getUniformLocation(name);
 	glUniform1i(location, value);
 }
 
 void Shader::setUniform(const std::string& name, const glm::vec2& value)
 {
-	int32_t location = glGetUniformLocation(m_program, name.c_str());
-	if (location == -1) std::cerr << "Uniform " << name << " not found" << std::endl;
+	int32_t location = getUniformLocation(name);
 	glUniform2fv(location, 1, glm::value_ptr(value));
 }
 
 void Shader::setUniform(const std::string& name, const glm::vec3& value)
 {
-	int32_t location = glGetUniformLocation(m_program, name.c_str());
-	if (location == -1) std::cerr << "Uniform " << name << " not found" << std::endl;
+	int32_t location = getUniformLocation(name);
 	glUniform3fv(location, 1, glm::value_ptr(value));
 }
 
 void Shader::setUniform(const std::string& name, const glm::vec4& value)
 {
-	int32_t location = glGetUniformLocation(m_program, name.c_str());		
-	if (location == -1) std::cerr << "Uniform " << name << " not found" << std::endl;
+	int32_t location = getUniformLocation(name);
 	glUniform4fv(location, 1, glm::value_ptr(value));
 }
 
 void Shader::setUniform(const std::string& name, const glm::mat3& value)
 {
-	int32_t location = glGetUniformLocation(m_program, name.c_str());
-	if (location == -1) std::cerr << "Uniform " << name << " not found" << std::endl;
+	int32_t location = getUniformLocation(name);
 	glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void Shader::setUniform(const std::string& name, const glm::mat4& value)
 {
-	int32_t location = glGetUniformLocation(m_program, name.c_str());
-	if (location == -1) std::cerr << "Uniform " << name << " not found" << std::endl;
+	int32_t location = getUniformLocation(name);
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
@@ -107,6 +100,21 @@ void Shader::unbind() const
 {
 	assert(m_program != invalid);
 	glUseProgram(0);
+}
+
+int32_t Shader::getUniformLocation(const std::string& name) const
+{
+	// check if the uniform location is already cached
+	if (m_uniformLocations.find(name) != m_uniformLocations.end())
+	{
+		return m_uniformLocations[name];
+	}
+
+	// if not, query the location and cache it
+	int32_t location = glGetUniformLocation(m_program, name.c_str());
+	if (location == -1) std::cerr << "Uniform " << name << " not found" << std::endl;
+	m_uniformLocations[name] = location;
+	return location;
 }
 
 // ShaderBuilder implementation
@@ -223,7 +231,7 @@ static bool checkProgramErrors(uint32_t program)
 	}
 }
 
-void ShaderManager::buildShader(const std::string& name, const std::filesystem::path& vertexPath, const std::filesystem::path& fragPath)
+void ShaderManager::buildShader(ShaderName name, const std::filesystem::path& vertexPath, const std::filesystem::path& fragPath)
 {
 	ShaderBuilder defaultShaderBuilder;
 	defaultShaderBuilder.addStage(GL_VERTEX_SHADER, vertexPath);
@@ -231,7 +239,11 @@ void ShaderManager::buildShader(const std::string& name, const std::filesystem::
 	m_shaders[name] = defaultShaderBuilder.build();
 }
 
-std::shared_ptr<Shader> ShaderManager::getShader(const std::string& name) const
+std::shared_ptr<Shader> ShaderManager::getShader(ShaderName name) const
 {
+	if (m_shaders.find(name) == m_shaders.end())
+	{
+		return m_shaders.at(ShaderName::PBR);
+	}
 	return m_shaders.at(name);
 }

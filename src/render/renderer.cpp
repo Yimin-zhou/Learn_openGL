@@ -6,7 +6,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 Renderer::Renderer() : 
-	m_camera(Camera(glm::vec3(0.0f, 0.0f, 3.0f), -90.0f, 0.0f, 3.0f, 0.05f)),
+	m_camera(Camera(glm::vec3(0.0f, 1.0f, 2.0f), -90.0f, 0.0f, 3.0f, 0.05f)),
 	m_aspectRatio(16.0f / 9.0f), m_finalFrambufferWidth(800), m_finalFrambufferHeight(600),
 	m_finalFramebuffer(0), m_finalTexture(0), m_depthBuffer(0), m_shaderManager(ShaderManager()), m_lightManager(LightManager())
 {
@@ -14,11 +14,21 @@ Renderer::Renderer() :
 
 void Renderer::init()
 {
-	m_models.push_back(Model(modelPath));
-	m_shaderManager.buildShader("lambert", "shader/lambert_vert.glsl", "shader/lambert_frag.glsl");
+	m_models.push_back(Model(modelPath, ModelType::OPAQUE));
+	m_shaderManager.buildShader(ShaderName::LAMBERT, "shader/lambert_vert.glsl", "shader/lambert_frag.glsl");
 	{
 		m_lightManager.addLight(std::make_shared<DirectionalLight>(glm::vec3(3.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.5f), 1.0f));
 		m_lightManager.addLight(std::make_shared<PointLight>(glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(1.0f, 0.0f, 1.0f), 1.0f, 1.0f, 0.09f, 0.032f));
+	}
+
+	m_shaderManager.buildShader(m_currentShaderName, "shader/pbr_vert.glsl", "shader/pbr_frag.glsl");
+	{
+		std::shared_ptr<DirectionalLight> directionalLight = std::make_shared<DirectionalLight>(glm::vec3(5.0f, 5.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 2.0f);
+		//sun direction
+		directionalLight->setDirection({ 1.0f, 1.0f, 0.0f });
+		m_lightManager.addLight(directionalLight);
+		m_lightManager.addLight(std::make_shared<PointLight>(glm::vec3(1.0f, 2.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 3.0f, 1.0f, 0.09f, 0.032f));
+		m_lightManager.addLight(std::make_shared<PointLight>(glm::vec3(-1.0f, 2.0f, 1.0f), glm::vec3(0.0f, 0.8f, 1.0f), 3.0f, 1.0f, 0.09f, 0.032f));
 	}
 }
 
@@ -52,19 +62,19 @@ void Renderer::draw(glm::vec2 renderSize)
 				{
 					// TODO: use default material
 				}
-				else
-				{
-					Material material = mesh.getMaterials()[entry.materialIndex];
-					material.setShader(m_shaderManager.getShader("lambert"));
-					material.use(model.getModelMatrix(), m_camera.getProjectionMatrix() * m_camera.getViewMatrix());
-					m_lightManager.updateShader(material.getShader());
-				}
+
+				Material material = mesh.getMaterials()[entry.materialIndex];
+				material.setShader(m_shaderManager.getShader(m_currentShaderName));
+				material.use(model.getModelMatrix(), m_camera.getProjectionMatrix() * m_camera.getViewMatrix(), m_camera.getPosition());
+				m_lightManager.updateShader(material.getShader());
 
 				glDrawElementsBaseVertex(GL_TRIANGLES,
 					entry.numIndices,
 					GL_UNSIGNED_INT,
 					(void*)(sizeof(uint32_t) * entry.baseIndex),
 					entry.baseVertex);
+
+				material.ubind();
 			}
 			glBindVertexArray(0);
 		}
@@ -108,4 +118,9 @@ void Renderer::resize(glm::vec2 renderSize)
 void Renderer::setCameraAspectRatio(float aspectRatio)
 {
 	m_camera.setAspectRatio(aspectRatio);
+}
+
+void Renderer::setCurrentShader(ShaderName shaderName)
+{
+	m_currentShaderName = shaderName;
 }

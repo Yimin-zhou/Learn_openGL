@@ -7,11 +7,17 @@
 #include "mesh.h"
 #include "material/material.h"
 
+enum class ModelType
+{
+	OPAQUE,
+	SIZE
+};
+
 class Model
 {
 public:
 	Model(const std::filesystem::path& path);
-
+	Model(const std::filesystem::path& path, ModelType type);
 
 	void setPosition(const glm::vec3& position);
 	void setRotation(const glm::vec3& rotation);
@@ -22,12 +28,18 @@ public:
 	glm::vec3 getRotation();
 	glm::vec3 getScale();
 
+	const std::string& getName() { return m_name; }
+	const ModelType& getType() { return m_type; }
+
 	// returns the meshes reference
 	int getMeshCount() { return m_meshes.size(); }
 	const std::vector<Mesh>& getMeshes() { return m_meshes; }
 	const std::vector<Material>& getMaterials() { return m_materials; }
 
 private:
+	ModelType m_type;
+	std::string m_name;
+
 	std::vector<Mesh> m_meshes;
 	std::vector<Material> m_materials;
 
@@ -36,7 +48,10 @@ private:
 	glm::vec3 m_scale;
 	glm::mat4 m_modelMatrix;
 
-private:
-	void m_loadMesh(const std::filesystem::path& filePath);
-	void m_updateModelMatrix();
+	void loadMesh(const std::filesystem::path& filePath);
+	void updateModelMatrix();
+
+	void calculateTangents(std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+
+
 };
