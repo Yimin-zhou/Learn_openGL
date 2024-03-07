@@ -273,21 +273,36 @@ void main()
 //    }
 //
 
-    // indirect
+    // indirect (single scattering)
+//    vec3 irradiance = texture(irradianceMap, normal).rgb;
+//    vec3 ks = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+//    vec3 kd = 1.0 - ks;
+//    vec3 diffuse = kd * albedo * irradiance * (1 - metalness);
+//
+//    // IBL (image based lighting)
+//    vec3 R = reflect(-V, N);
+//    float mipLevel = roughness * 4.0;
+//    vec3 prefilteredColor = textureLod(prefilterMap, R, mipLevel).rgb;
+//    vec2 envBRDF = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+//    vec3 specular = prefilteredColor * (ks * envBRDF.x + envBRDF.y);
+//
+//    vec3 indirectLight = (diffuse + specular) * ao;
+
+    // indirect (multiple scattering)
     vec3 irradiance = texture(irradianceMap, normal).rgb;
     vec3 ks = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
-    vec3 kd = 1.0 - ks;
-    vec3 diffuse = kd * albedo * irradiance;
-
-    // IBL (image based lighting)
     vec3 R = reflect(-V, N);
     float mipLevel = roughness * 4.0;
     vec3 prefilteredColor = textureLod(prefilterMap, R, mipLevel).rgb;
     vec2 envBRDF = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
-    vec3 specular = prefilteredColor * (ks * envBRDF.x + envBRDF.y);
 
-    vec3 indirectLight = (diffuse + specular) * ao;
-    
+    vec3 FssEss = ks * envBRDF.x + envBRDF.y;
+
+    float Ems = (1.0 - (envBRDF.x + envBRDF.y));
+    vec3 Favg = F0 + (1.0 - F0) / 21.0;
+    vec3 FmsEms = Ems * FssEss * Favg / (1.0 - Favg * Ems);
+    vec3 kd = albedo * (1.0 - FssEss - FmsEms) * (1.0 - metalness);
+    vec3 indirectLight = (FssEss * prefilteredColor + (FmsEms + kd) * irradiance) * ao;
 
     vec3 color = indirectLight + Lo;
     color = ToneMapACES(color);
