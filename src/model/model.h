@@ -34,7 +34,11 @@ public:
 	// returns the meshes reference
 	int getMeshCount() { return m_meshes.size(); }
 	const std::vector<Mesh>& getMeshes() { return m_meshes; }
-	const std::vector<Material>& getMaterials() { return m_materials; }
+	const Mesh& getMesh(int index) { return m_meshes[index]; }
+
+	std::vector<Material>& getMaterials() { return m_materials; }
+	void setMaterial(int index, const Material& material) { m_materials[index] = material; }
+	void setMaterials(const std::vector<Material>& materials) { m_materials = materials; }
 
 private:
 	ModelType m_type;

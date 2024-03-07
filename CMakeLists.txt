@@ -79,7 +79,7 @@ set(CORE_SOURCES
     "src/render/light/spotLight.cpp"
     "src/render/light/lightManager.h"
     "src/render/light/lightManager.cpp"
- )
+  "src/effects/skyBox.h" "src/effects/skyBox.cpp")
 
 set(UTIL_SOURCES
     "src/window/window.cpp" 

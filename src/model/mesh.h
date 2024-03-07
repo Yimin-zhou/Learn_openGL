@@ -32,8 +32,7 @@ class Mesh
 public:
 	Mesh(const std::vector<Vertex>& vertices,
 		const std::vector<uint32_t>& indices,
-		const std::vector<MeshEntry>& meshEntries,
-		const std::vector<Material>& materials);
+		const std::vector<MeshEntry>& meshEntries);
 	Mesh() = default;
 	~Mesh();
 
@@ -47,12 +46,10 @@ public:
 	uint32_t getVbo() const { return m_vbo; }
 	uint32_t getEbo() const { return m_ebo; }
 	const std::vector<MeshEntry>& getEntries() const { return m_entries; }
-	const std::vector<Material>& getMaterials() const { return m_materials; }
 
 private:
 	uint32_t m_vao;
 	uint32_t m_vbo;
 	uint32_t m_ebo;
 	std::vector<MeshEntry> m_entries; // Submeshes
-	std::vector<Material> m_materials;
 };

@@ -1,8 +1,26 @@
 # Blender 4.0.2 MTL File: 'spaceman.blend'
 # www.blender.org
 
-newmtl Material.001
-Kd 1.00000 1.000000 1.000000
+newmtl 3DColorCalibration
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+norm universal/normal.png
+map_Kd colorChart/ColorCalibrationChart_Color.png
+map_Pm colorChart/ColorCalibrationChart_Metalic.png
+map_Pr colorChart/ColorCalibrationChart_Roughness.png
+map_Ka universal/ao.png
+
+newmtl box1
+Kd 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
@@ -15,11 +33,11 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-norm spaceman_normal.tga
-map_Kd albedo_grass.jpg
-map_Pm albedo_grass.jpg
-map_Pr albedo_grass.jpg
-map_Ka albedo_grass.jpg
+norm universal/normal.png
+map_Kd universal/albedo.png
+map_Pm universal/metallic.png
+map_Pr universal/roughness.png
+map_Ka universal/ao.png
 
 newmtl spaceman
 Kd 1.00000 1.000000 1.000000
@@ -40,3 +58,22 @@ map_Pm spaceman_metallic.tga
 map_Pr spaceman_roughness.tga
 map_Ka spaceman_ao.tga
 
+newmtl sphere
+Kd 0.800000 0.800000 0.500000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+Pr 0.500000
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+norm universal/normal.png
+map_Kd universal/albedo.png
+map_Pm universal/metallic.png
+map_Pr universal/roughness.png
+map_Ka universal/ao.png

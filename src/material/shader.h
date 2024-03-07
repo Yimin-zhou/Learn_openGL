@@ -18,6 +18,12 @@ enum class ShaderName
 	LAMBERT,
 	PBR,
 
+	SKYBOX,
+
+	CONVOLUTION,
+	PREFILTER,
+	PRE_BRDF,
+
 	SIZE
 };
 
@@ -69,6 +75,7 @@ public:
 	ShaderManager() = default;
 
 	void buildShader(ShaderName name, const std::filesystem::path& vertexPath, const std::filesystem::path& fragPath);
+	void buildComputeShader(ShaderName name, const std::filesystem::path& computePath);
 	std::shared_ptr<Shader> getShader(ShaderName name) const;
 
 private:

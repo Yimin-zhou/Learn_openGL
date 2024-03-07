@@ -77,28 +77,34 @@ void Model::calculateTangents(std::vector<Vertex>& vertices, const std::vector<u
 
 		float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
 
-		glm::vec3 tangent;
-		tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
-		tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
-		tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
-		tangent = glm::normalize(tangent);
+		glm::vec3 tangent1;
+		tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+		tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+		tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+		tangent1 = glm::normalize(tangent1);
 
-		v0.tangent += tangent;
-		v1.tangent += tangent;
-		v2.tangent += tangent;
+		glm::vec3 bitangent1;
+		bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+		bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+		bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+		bitangent1 = glm::normalize(bitangent1);
 
-		glm::vec3 bitangent = glm::cross(v0.normal, tangent);
-		v0.bitangent = bitangent;
-		v1.bitangent = bitangent;
-		v2.bitangent = bitangent;
+		v0.tangent += tangent1;
+		v1.tangent += tangent1;
+		v2.tangent += tangent1;
+
+		v0.bitangent += bitangent1;
+		v1.bitangent += bitangent1;
+		v2.bitangent += bitangent1;
 	}
 
-	for (size_t i = 0; i < vertices.size(); i++)
+	for (size_t i = 0; i < vertices.size(); ++i)
 	{
 		Vertex& v = vertices[i];
 		v.tangent = glm::normalize(v.tangent);
 		v.bitangent = glm::normalize(v.bitangent);
 	}
+
 }
 
 void Model::loadMesh(const std::filesystem::path& filePath)
@@ -116,8 +122,8 @@ void Model::loadMesh(const std::filesystem::path& filePath)
 	{
 		throw std::runtime_error(err);
 	}
-	if (!warn.empty()) {
-
+	if (!warn.empty()) 
+	{
 		std::cout << "Warning: " << warn << std::endl;
 	}
 	if (!err.empty()) 
@@ -128,13 +134,15 @@ void Model::loadMesh(const std::filesystem::path& filePath)
 	for (const auto& mat : tinyMaterials)
 	{
 		Material material;
-		material.pbrParameter.diffuse = glm::vec3(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2]);
-		material.pbrParameter.albedoMap = std::make_shared<Texture>(parentPath / mat.diffuse_texname);
-		material.pbrParameter.roughnessMap = std::make_shared<Texture>(parentPath / mat.roughness_texname);
-		material.pbrParameter.metallicMap = std::make_shared<Texture>(parentPath / mat.metallic_texname);
-		material.pbrParameter.normalMap = std::make_shared<Texture>(parentPath / mat.normal_texname);
-		material.pbrParameter.aoMap = std::make_shared<Texture>(parentPath / mat.ambient_texname);
+		material.pbrParameter.setDiffuse(glm::vec3(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2]));
+		material.pbrParameter.setAlbedoMap(std::make_shared<Texture>(parentPath / mat.diffuse_texname));
+		material.pbrParameter.setRoughnessMap(std::make_shared<Texture>(parentPath / mat.roughness_texname));
+		material.pbrParameter.setMetallicMap(std::make_shared<Texture>(parentPath / mat.metallic_texname));
+		material.pbrParameter.setNormalMap(std::make_shared<Texture>(parentPath / mat.normal_texname));
+		material.pbrParameter.setAoMap(std::make_shared<Texture>(parentPath / mat.ambient_texname));
 		// Add more material properties here as needed
+		material.pbrParameter.setRoughness(1.0f);
+		material.pbrParameter.setMetallic(1.0f);
 		m_materials.push_back(material);
 	}
 
@@ -150,53 +158,67 @@ void Model::loadMesh(const std::filesystem::path& filePath)
 		entry.baseIndex = 0;
 		entry.materialIndex = !shape.mesh.material_ids.empty() ? shape.mesh.material_ids[0] : -1; // Use -1 if no material
 
-		for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++) 
+		for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); ++f) 
 		{
-			int fv = shape.mesh.num_face_vertices[f];
+			int fv = shape.mesh.num_face_vertices[f]; // The number of vertices for this face
 
-			// Before processing the face, check if we need to start a new entry due to a material change
+			// Check for material change
 			int currentMaterialIndex = shape.mesh.material_ids[f];
-			if (currentMaterialIndex != entry.materialIndex) 
+			if (entries.empty() || currentMaterialIndex != entries.back().materialIndex) 
 			{
-				// Finalize the current entry if it's not the first iteration
-				if (f > 0) 
+				if (!entries.empty()) 
 				{
-					entry.numIndices = static_cast<uint32_t>(indices.size()) - entry.baseIndex;
-					entries.push_back(entry);
+					// Finalize the previous entry
+					auto& lastEntry = entries.back();
+					lastEntry.numIndices = static_cast<uint32_t>(indices.size()) - lastEntry.baseIndex;
 				}
-				// Start a new entry
-				entry.baseVertex = static_cast<uint32_t>(vertices.size());
-				entry.baseIndex = static_cast<uint32_t>(indices.size());
-				entry.materialIndex = currentMaterialIndex;
+
+				// Start a new entry for the new material
+				MeshEntry newEntry;
+				newEntry.baseVertex = 0;
+				newEntry.baseIndex = static_cast<uint32_t>(indices.size());
+				newEntry.materialIndex = currentMaterialIndex;
+				entries.push_back(newEntry);
 			}
 
-			for (size_t v = 0; v < fv; v++) 
+			// Now process each vertex in the face
+			for (size_t v = 0; v < fv; ++v) 
 			{
 				tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
 
-				glm::vec3 position(attrib.vertices[3 * idx.vertex_index + 0],
+				glm::vec3 position = idx.vertex_index >= 0 ? glm::vec3(
+					attrib.vertices[3 * idx.vertex_index + 0],
 					attrib.vertices[3 * idx.vertex_index + 1],
-					attrib.vertices[3 * idx.vertex_index + 2]);
-				glm::vec3 normal(attrib.normals[3 * idx.normal_index + 0],
-					attrib.normals[3 * idx.normal_index + 1],
-					attrib.normals[3 * idx.normal_index + 2]);
-				glm::vec2 texCoords(attrib.texcoords[2 * idx.texcoord_index + 0],
-					1.0f - attrib.texcoords[2 * idx.texcoord_index + 1]);
+					attrib.vertices[3 * idx.vertex_index + 2]) : glm::vec3(0.0f);
 
-				vertices.push_back(Vertex{ position, normal, texCoords });
-				indices.push_back(static_cast<uint32_t>(vertices.size() - 1)); // Index of the added vertex
+				glm::vec3 normal = idx.normal_index >= 0 ? glm::vec3(
+					attrib.normals[3 * idx.normal_index + 0],
+					attrib.normals[3 * idx.normal_index + 1],
+					attrib.normals[3 * idx.normal_index + 2]) : glm::vec3(0.0f);
+
+				glm::vec2 texCoords = idx.texcoord_index >= 0 ? glm::vec2(
+					attrib.texcoords[2 * idx.texcoord_index + 0],
+					1.0f - attrib.texcoords[2 * idx.texcoord_index + 1]) : glm::vec2(0.0f); // Flip the y-coordinate
+
+				// Add the vertex to the vertices vector
+				vertices.push_back({ position, normal, texCoords });
+				indices.push_back(static_cast<uint32_t>(vertices.size() - 1)); // Use the actual last vertex's index
 			}
+
 			index_offset += fv;
 		}
 
 		// Calculate tangents and bitangents
 		calculateTangents(vertices, indices);
 
-		// Add the last entry after finishing all faces
-		entry.numIndices = static_cast<uint32_t>(indices.size()) - entry.baseIndex;
-		entries.push_back(entry);
+		// Finalize the last entry after finishing processing all faces
+		if (!entries.empty()) 
+		{
+			auto& lastEntry = entries.back();
+			lastEntry.numIndices = static_cast<uint32_t>(indices.size()) - lastEntry.baseIndex;
+		}
 
-		m_meshes.emplace_back(vertices, indices, entries, m_materials);
+		m_meshes.emplace_back(vertices, indices, entries);
 
 	}
 }

@@ -239,6 +239,13 @@ void ShaderManager::buildShader(ShaderName name, const std::filesystem::path& ve
 	m_shaders[name] = defaultShaderBuilder.build();
 }
 
+void ShaderManager::buildComputeShader(ShaderName name, const std::filesystem::path& computePath)
+{
+	ShaderBuilder computeShaderBuilder;
+	computeShaderBuilder.addStage(GL_COMPUTE_SHADER, computePath);
+	m_shaders[name] = computeShaderBuilder.build();
+}
+
 std::shared_ptr<Shader> ShaderManager::getShader(ShaderName name) const
 {
 	if (m_shaders.find(name) == m_shaders.end())

@@ -43,12 +43,16 @@ void Application::init()
 		std::cout << "Error!" << std::endl;
 	}
 
+	// check opengl version
+	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+
 
 #ifdef _DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(MessageCallback, 0);
-	glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 0, NULL, GL_FALSE);
+
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
 
 #endif
 	// Set the viewport
@@ -79,6 +83,7 @@ void Application::update()
 void Application::run()
 {
 	init();
+	m_renderer->preprocess();
 
 	/* Loop until the user closes the window */
 	while (!m_window->shouldClose())

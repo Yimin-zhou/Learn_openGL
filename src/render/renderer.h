@@ -6,6 +6,7 @@
 #include "model/model.h"
 #include "camera/camera.h"
 #include "render/light/LightManager.h"
+#include "effects/skyBox.h"
 
 #include <string>
 #include <vector>
@@ -16,6 +17,7 @@ public:
 	Renderer();
 
 	void init();
+	void preprocess();
 	void update(std::shared_ptr<Window> window, float deltaTime);
 	void draw(glm::vec2 renderSize);
 
@@ -23,11 +25,6 @@ public:
 
 	void setCameraAspectRatio(float aspectRatio);
 	uint32_t getFinalTexture() { return m_finalTexture; }
-
-	//Shader
-	void setCurrentShader(ShaderName shaderName);
-	ShaderName getCurrentShaderName() { return m_currentShaderName; }
-	ShaderManager& getShaderManager() { return m_shaderManager; }
 
 	// models
 	std::vector<Model>& getModels() { return m_models; }
@@ -37,6 +34,9 @@ public:
 
 	// lightings
 	LightManager& getLightManager() { return m_lightManager; }
+
+	// skybox
+	SkyBox& getSkyBox() { return m_skyBox; }
 
 public:
 	// scene model path 
@@ -55,8 +55,11 @@ private:
 
 	// scene
 	std::vector<Model> m_models;
-	ShaderName m_currentShaderName = ShaderName::PBR;
 	ShaderManager m_shaderManager;
 	LightManager m_lightManager;
 	Camera m_camera;
+
+	// skybox
+	SkyBox m_skyBox;
+
 };

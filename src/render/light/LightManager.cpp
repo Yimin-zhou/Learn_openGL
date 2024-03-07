@@ -56,6 +56,7 @@ void ShaderLightUpdater::visit(PointLight& light)
 	m_shader->setUniform("pointLights[" + std::to_string(m_pointCount) + "].constant", light.getConstant());
 	m_shader->setUniform("pointLights[" + std::to_string(m_pointCount) + "].linear", light.getLinear());
 	m_shader->setUniform("pointLights[" + std::to_string(m_pointCount) + "].quadratic", light.getQuadratic());
+	m_shader->setUniform("pointLights[" + std::to_string(m_pointCount) + "].radius", light.getRadius());
 	m_pointCount++;
 	m_shader->setUniform("activePointLights", m_pointCount);
 }

@@ -1,6 +1,8 @@
 #include "GL/glew.h"
 #include "stb_image.h"
 
+#include <iostream>
+
 #include "texture.h"
 
 Texture::Texture(const std::filesystem::path& path)
@@ -22,16 +24,25 @@ void Texture::loadTextureFromFile(const char* path)
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// Mipmap
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_localBuffer);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	// Wrapping
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	if (m_localBuffer)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_localBuffer);
+		glGenerateMipmap(GL_TEXTURE_2D);
 		stbi_image_free(m_localBuffer);
+	}
+	else
+	{
+		std::cout << "Failed to load texture: " << path << std::endl;
+	}
+
 }
 
 void Texture::bind(uint32_t slot) const

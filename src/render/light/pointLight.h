@@ -5,24 +5,26 @@
 class PointLight : public Light 
 {
 public:
-	PointLight(const glm::vec3& position, const glm::vec3& color, float intensity, float constant, float linear, float quadratic);
+    PointLight(const glm::vec3& position, const glm::vec3& color, float intensity,
+        float constant, float linear, float quadratic, float radius);
 
-	float getConstant() const;
+    float getConstant() const;
+    void setConstant(float constant);
 
-	void setConstant(float constant);
+    float getLinear() const;
+    void setLinear(float linear);
 
-	float getLinear() const;
+    float getQuadratic() const;
+    void setQuadratic(float quadratic);
 
-	void setLinear(float linear);
+    float getRadius() const;
+    void setRadius(float radius);
 
-	float getQuadratic() const;
-
-	void setQuadratic(float quadratic);
-
-	void accept(LightVisitor& visitor) override { visitor.visit(*this); }
+    void accept(LightVisitor& visitor) override;
 
 private:
-	float m_constant;
-	float m_linear;
-	float m_quadratic;
+    float m_constant;
+    float m_linear;
+    float m_quadratic;
+    float m_radius; // ????
 };

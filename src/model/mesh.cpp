@@ -1,9 +1,8 @@
 #include "mesh.h"
 #include <GL/glew.h>
 
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const std::vector<MeshEntry>& meshEntries, const std::vector<Material>& materials)
-	: m_entries(meshEntries), m_materials(materials),
-	m_vao(0), m_vbo(0), m_ebo(0)
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const std::vector<MeshEntry>& meshEntries)
+	: m_entries(meshEntries), m_vao(0), m_vbo(0), m_ebo(0)
 {
 
 	glGenVertexArrays(1, &m_vao);
@@ -45,7 +44,7 @@ Mesh::~Mesh()
 
 Mesh::Mesh(Mesh&& other) noexcept
 	: m_vao(other.m_vao), m_vbo(other.m_vbo), m_ebo(other.m_ebo),
-	m_entries(std::move(other.m_entries)), m_materials(std::move(other.m_materials)) 
+	m_entries(std::move(other.m_entries)) 
 {
 	other.m_vao = 0;
 	other.m_vbo = 0;
@@ -64,7 +63,6 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
 		m_vbo = other.m_vbo;
 		m_ebo = other.m_ebo;
 		m_entries = std::move(other.m_entries);
-		m_materials = std::move(other.m_materials);
 
 		other.m_vao = 0;
 		other.m_vbo = 0;

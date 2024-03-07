@@ -184,6 +184,11 @@ void ImGuiManager::draw(uint32_t texture)
 					{
 						pointLight->setQuadratic(quadratic);
 					}
+					float radius = pointLight->getRadius();
+					if (ImGui::DragFloat("Radius", &radius, 0.01f, 0.0f, 100.0f))
+					{
+						pointLight->setRadius(radius);
+					}
 				}
 
 				ImGui::PopID();
@@ -192,7 +197,7 @@ void ImGuiManager::draw(uint32_t texture)
 
 			if (ImGui::Button("Add Point Light")) {
 				// Assuming 'addLight' takes a shared_ptr to a new light as parameter
-				m_renderer->getLightManager().addLight(std::make_shared<PointLight>(glm::vec3(0), glm::vec3(1), 1.0f, 1.0f, 0.09f, 0.032f));
+				m_renderer->getLightManager().addLight(std::make_shared<PointLight>(glm::vec3(0), glm::vec3(1), 1.0f, 1.0f, 0.09f, 0.032f, 5.0f));
 			}
 
 			ImGui::Text("Amount of Point Lights: %d", static_cast<int>(pointLights.size()));
@@ -209,6 +214,9 @@ void ImGuiManager::draw(uint32_t texture)
 		ImGui::Text("Performance:");
 		ImGui::Text(" %.3f ms , %.1f FPS", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Separator();
+		ImGui::Text("PBR Precomputed Textures:");
+		ImGui::Text("BRDF LUT:");
+		ImGui::Image((void*)m_renderer->getSkyBox().getBRDFLUTTexture(), ImVec2(128, 128));
 
 		ImGui::End();
 	}
@@ -359,26 +367,27 @@ void ImGuiManager::modelInspector()
 				{
 					if (ImGui::CollapsingHeader(("Material " + std::to_string(i)).c_str()))
 					{
-						auto& material = materials[i];
+						// show material properties
+						glm::vec3 baseColor = materials[i].pbrParameter.getDiffuse();
 
 						// show material textures
-						auto albedoTexture = material.pbrParameter.albedoMap;
-						auto normalTexture = material.pbrParameter.normalMap;
-						auto metallicTexture = material.pbrParameter.metallicMap;
-						auto roughnessTexture = material.pbrParameter.roughnessMap;
-						auto aoTexture = material.pbrParameter.aoMap;
+						auto albedoTexture = materials[i].pbrParameter.getAlbedoMap();
+						auto normalTexture = materials[i].pbrParameter.getNormalMap();
+						auto metallicTexture = materials[i].pbrParameter.getMetallicMap();
+						auto roughnessTexture = materials[i].pbrParameter.getRoughnessMap();
+						auto aoTexture = materials[i].pbrParameter.getAoMap();
 
 						// select shader from shader manager
-						ShaderName currentShaderName = m_renderer->getCurrentShaderName();
+						ShaderName currentShaderName = materials[i].getShaderName();
 
 						if (ImGui::BeginCombo("Shader", shaderToString(currentShaderName).c_str()))
 						{
-							for (int i = 0; i < static_cast<int>(ShaderName::SIZE); i++)
+							for (int j = 0; j < static_cast<int>(ShaderName::SIZE); j++)
 							{
-								bool isSelected = (currentShaderName == static_cast<ShaderName>(i));
-								if (ImGui::Selectable(shaderToString(static_cast<ShaderName>(i)).c_str(), isSelected))
+								bool isSelected = (currentShaderName == static_cast<ShaderName>(j));
+								if (ImGui::Selectable(shaderToString(static_cast<ShaderName>(j)).c_str(), isSelected))
 								{
-									m_renderer->setCurrentShader(static_cast<ShaderName>(i));
+									materials[i].setShaderName(static_cast<ShaderName>(j));
 								}
 
 								if (isSelected)
@@ -387,6 +396,23 @@ void ImGuiManager::modelInspector()
 								}
 							}
 							ImGui::EndCombo();
+						}
+						ImGui::Separator();
+
+						// show material properties
+						if (ImGui::ColorEdit3("Base Color", glm::value_ptr(baseColor)))
+						{
+							materials[i].pbrParameter.setDiffuse(baseColor);
+						}
+						float roughness = materials[i].pbrParameter.getRoughness();
+						if (ImGui::DragFloat("Roughness", &roughness, 0.01f, 0.0f, 5.0f))
+						{
+							materials[i].pbrParameter.setRoughness(roughness);
+						}
+						float metallic = materials[i].pbrParameter.getMetallic();
+						if (ImGui::DragFloat("Metallic", &metallic, 0.01f, 0.0f, 5.0f))
+						{
+							materials[i].pbrParameter.setMetallic(metallic);
 						}
 
 						showTextureSelector("ChooseAlbedoTexture", "Albedo Map", albedoTexture);
@@ -469,6 +495,8 @@ void ImGuiManager::showTextureSelector(const char* dialogKey, const char* textur
 		ImGui::Text("Width: %d", texture->getWidth());
 		ImGui::SameLine();
 		ImGui::Text("Height: %d", texture->getHeight());
+		ImGui::Separator();
+
 		// TODO Add more properties here as needed
 
 		if (ImGuiFileDialog::Instance()->Display(dialogKey)) 
