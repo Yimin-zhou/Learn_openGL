@@ -74,6 +74,32 @@ void Material::ubind() const
 	pbrParameter.getRoughnessMap()->unbind();
 }
 
+void Material::useGeometryPass(const glm::mat4& modelMatrix, const glm::mat4& projectionViewMatrix, const glm::vec3& cameraPos) const
+{
+	// Set matrices
+	m_shader->setUniform("modelMatrix", modelMatrix);
+	m_shader->setUniform("projectionViewMatrix", projectionViewMatrix);
+
+	// Set material properties
+	m_shader->setUniform("baseColor", glm::vec4(pbrParameter.getDiffuse(), 1.0f));
+	m_shader->setUniform("roughnessStrength", pbrParameter.getRoughness());
+	m_shader->setUniform("metallicStrength", pbrParameter.getMetallic());
+
+	m_shader->setUniform("cameraPos", cameraPos);
+
+	// Set textures
+	pbrParameter.getAlbedoMap()->bind(0);
+	m_shader->setUniform("albedoMap", 0);
+	pbrParameter.getNormalMap()->bind(1);
+	m_shader->setUniform("normalMap", 1);
+	pbrParameter.getMetallicMap()->bind(2);
+	m_shader->setUniform("metallicMap", 2);
+	pbrParameter.getRoughnessMap()->bind(3);
+	m_shader->setUniform("roughnessMap", 3);
+	pbrParameter.getAoMap()->bind(4);
+	m_shader->setUniform("aoMap", 4);
+}
+
 void Material::setShader(std::shared_ptr<Shader> shader)
 {
 	m_shader = shader;

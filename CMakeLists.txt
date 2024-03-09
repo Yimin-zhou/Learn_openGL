@@ -53,7 +53,7 @@ set(CORE_SOURCES
     "src/render/renderer.h"
     "src/core/application.cpp" 
     "src/core/application.h"
-)
+ "src/render/deferredRenderer.cpp" "src/render/deferredRenderer.h")
 
  set(RENDER_SOURCES
     "src/model/model.h"

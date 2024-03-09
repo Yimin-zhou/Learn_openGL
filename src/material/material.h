@@ -56,12 +56,14 @@ class Material
 public:
 	Material();
 
-	void use(const glm::mat4& modelMatrix, const glm::mat4& projectionViewMatrix, const glm::vec3& viewDirection) const;
+	void use(const glm::mat4& modelMatrix, const glm::mat4& projectionViewMatrix, const glm::vec3& camPos) const;
 	void useEnvironmentMap(uint32_t environmentMap);
 	void useIrradianceMap(uint32_t irradianceMap);
 	void usePrefilterMap(uint32_t prefilterMap);
 	void useBRDFLUTTexture(uint32_t brdfLUTTexture);
 	void ubind() const;
+
+	void useGeometryPass(const glm::mat4& modelMatrix, const glm::mat4& projectionViewMatrix, const glm::vec3& cameraPos) const;
 
 	void setShader(std::shared_ptr<Shader> shader);
 	std::shared_ptr<Shader> getShader() const;

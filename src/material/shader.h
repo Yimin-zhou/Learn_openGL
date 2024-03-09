@@ -20,6 +20,7 @@ enum class ShaderName
 
 	SKYBOX,
 
+	GBUFFER,
 	CONVOLUTION,
 	PREFILTER,
 	PRE_BRDF,
