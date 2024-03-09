@@ -3,6 +3,8 @@
 #include <memory>
 
 #include "render/renderer.h"
+#include "render/deferredRenderer.h"
+#include "render/forwardRenderer.h"
 #include "window/window.h"
 #include "window/ImGuiManager.h"
 

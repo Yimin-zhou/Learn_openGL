@@ -3,6 +3,7 @@
 #include "imgui.h"
 
 #include "render/renderer.h"
+#include "render/deferredRenderer.h"
 #include "window.h"
 
 

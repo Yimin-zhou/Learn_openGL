@@ -31,7 +31,7 @@ Application::Application(int h, int w, const char* name)
 : m_height(h), m_width(w), m_name(name), m_deltaTime(0.0f), m_lastFrame(0.0f)
 {
 	m_window = std::make_shared<Window>(m_height, m_width, m_name);
-	m_renderer = std::make_shared<Renderer>();
+	m_renderer = std::make_shared<DeferredRenderer>();
 	m_imGuiManager = std::make_shared<ImGuiManager>(m_window, m_renderer);
 }
 
@@ -62,7 +62,6 @@ void Application::init()
 	framebuffer_size_callback(m_window->get(), width, height);
 
 	m_renderer->init();
-	m_renderer->resize(m_window->getSize()); // initial resize to set framebuffer size
 	m_imGuiManager->init();
 }
 

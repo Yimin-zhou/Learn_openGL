@@ -1,18 +1,19 @@
 #include <iostream>
 
-#include "renderer.h"
+#include "forwardRenderer.h"
 #include "util/config.h"
 
 #include <glm/gtx/string_cast.hpp>
 
-Renderer::Renderer() :
+ForwardRenderer::ForwardRenderer() :
 	m_camera(Camera(glm::vec3(0.0f, 1.0f, 2.0f), -90.0f, 0.0f, 3.0f, 0.05f)),
 	m_aspectRatio(16.0f / 9.0f), m_finalFrambufferWidth(800), m_finalFrambufferHeight(600),
-	m_finalFramebuffer(0), m_finalTexture(0), m_depthBuffer(0), m_shaderManager(ShaderManager()), m_lightManager(LightManager())
+	m_finalFramebuffer(0), m_finalTexture(0), m_depthBuffer(0), m_shaderManager(ShaderManager()), m_lightManager(LightManager()),
+	m_renderSize(800, 600)
 {
 }
 
-void Renderer::init()
+void ForwardRenderer::init()
 {
 	m_models.push_back(Model(modelPath, ModelType::OPAQUE));
 
@@ -32,9 +33,12 @@ void Renderer::init()
 		//m_lightManager.addLight(std::make_shared<PointLight>(glm::vec3(1.0f, 2.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 30.0f, 1.0f, 0.09f, 0.032f, 20.0f));
 		//m_lightManager.addLight(std::make_shared<PointLight>(glm::vec3(-1.0f, 2.0f, 1.0f), glm::vec3(0.0f, 0.8f, 1.0f), 30.0f, 1.0f, 0.09f, 0.032f, 20.0f));
 	}
+
+	// create framebuffer
+	createFinalBuffer();
 }
 
-void Renderer::preprocess()
+void ForwardRenderer::preprocess()
 {
 	// skybox
 	m_skyBox.initData(std::vector<std::filesystem::path>{
@@ -50,12 +54,12 @@ void Renderer::preprocess()
 	m_skyBox.generateBRDFLUTTexture(m_shaderManager.getShader(ShaderName::PRE_BRDF));
 }
 
-void Renderer::update(std::shared_ptr<Window> window, float deltaTime)
+void ForwardRenderer::update(std::shared_ptr<Window> window, float deltaTime)
 {
 	m_camera.update(window, deltaTime);
 }
 
-void Renderer::draw(glm::vec2 renderSize)
+void ForwardRenderer::draw(glm::vec2 renderSize)
 {
 	// render pass
 	// bind framebuffer
@@ -108,13 +112,24 @@ void Renderer::draw(glm::vec2 renderSize)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Renderer::resize(glm::vec2 renderSize)
+void ForwardRenderer::resize(glm::vec2 renderSize)
 {
 	// when window is resized, we need to resize the framebuffer
+	m_renderSize = renderSize;
+	createFinalBuffer();
+}
+
+void ForwardRenderer::setCameraAspectRatio(float aspectRatio)
+{
+	m_camera.setAspectRatio(aspectRatio);
+}
+
+void ForwardRenderer::createFinalBuffer()
+{
 	// init final framebuffer texture
 	glGenTextures(1, &m_finalTexture);
 	glBindTexture(GL_TEXTURE_2D, m_finalTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, renderSize.x, renderSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_renderSize.x, m_renderSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // minification filter
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // magnification filter
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -127,7 +142,7 @@ void Renderer::resize(glm::vec2 renderSize)
 	// init depth buffer
 	glGenRenderbuffers(1, &m_depthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_depthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, renderSize.x, renderSize.y);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_renderSize.x, m_renderSize.y);
 
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depthBuffer); // attach depth buffer to framebuffer
 
@@ -139,9 +154,4 @@ void Renderer::resize(glm::vec2 renderSize)
 
 	// unbind framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void Renderer::setCameraAspectRatio(float aspectRatio)
-{
-	m_camera.setAspectRatio(aspectRatio);
 }

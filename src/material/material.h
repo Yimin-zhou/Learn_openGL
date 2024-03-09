@@ -8,6 +8,8 @@
 #include "shader.h"
 #include "texture.h"
 
+#include "render/gBuffer.h"
+
 class PBRParameter
 {
 public:
@@ -63,7 +65,8 @@ public:
 	void useBRDFLUTTexture(uint32_t brdfLUTTexture);
 	void ubind() const;
 
-	void useGeometryPass(const glm::mat4& modelMatrix, const glm::mat4& projectionViewMatrix, const glm::vec3& cameraPos) const;
+	// deferred rendering
+	void useGeometryPass(const glm::mat4& modelMatrix, const glm::mat4& projectionViewMatrix) const;
 
 	void setShader(std::shared_ptr<Shader> shader);
 	std::shared_ptr<Shader> getShader() const;

@@ -1,3 +1,4 @@
+
 #pragma once
 #include <GL/glew.h>
 
@@ -14,52 +15,25 @@
 class Renderer
 {
 public:
-	Renderer();
+	virtual ~Renderer() {}
 
-	void init();
-	void preprocess();
-	void update(std::shared_ptr<Window> window, float deltaTime);
-	void draw(glm::vec2 renderSize);
+	virtual void init() = 0;
+	virtual void preprocess() = 0;
+	virtual void update(std::shared_ptr<Window> window, float deltaTime) = 0;
+	virtual void draw(glm::vec2 renderSize) = 0;
 
-	void resize(glm::vec2 renderSize);
+	virtual void resize(glm::vec2 renderSize) = 0;
 
-	void setCameraAspectRatio(float aspectRatio);
-	uint32_t getFinalTexture() { return m_finalTexture; }
+	virtual void setCameraAspectRatio(float aspectRatio) = 0;
+	virtual uint32_t getFinalTexture() = 0;
 
-	// models
-	std::vector<Model>& getModels() { return m_models; }
+	virtual std::vector<Model>& getModels() = 0;
 
-	// camera
-	Camera& getCamera() { return m_camera; }
+	virtual Camera& getCamera() = 0;
 
 	// lightings
-	LightManager& getLightManager() { return m_lightManager; }
+	virtual LightManager& getLightManager() = 0;
 
 	// skybox
-	SkyBox& getSkyBox() { return m_skyBox; }
-
-public:
-	// scene model path 
-	std::filesystem::path modelPath = "res/models/spaceman/spaceman.obj";
-
-private:
-	// properties
-	float m_aspectRatio;
-
-	// framebuffers
-	uint32_t m_finalFrambufferWidth;
-	uint32_t m_finalFrambufferHeight;
-	uint32_t m_finalFramebuffer;
-	uint32_t m_finalTexture;
-	uint32_t m_depthBuffer;
-
-	// scene
-	std::vector<Model> m_models;
-	ShaderManager m_shaderManager;
-	LightManager m_lightManager;
-	Camera m_camera;
-
-	// skybox
-	SkyBox m_skyBox;
-
+	virtual SkyBox& getSkyBox() = 0;
 };

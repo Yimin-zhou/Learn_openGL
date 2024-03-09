@@ -1,23 +1,10 @@
-﻿#pragma once
-#include <GL/glew.h>
-
-#include "window/window.h"
-#include "material/shader.h"
-#include "model/model.h"
-#include "camera/camera.h"
-#include "render/light/LightManager.h"
-#include "effects/skyBox.h"
-#include "gBuffer.h"
+#pragma once
 #include "renderer.h"
 
-#include <string>
-#include <vector>
-
-class DeferredRenderer : public Renderer
+class ForwardRenderer : public Renderer
 {
 public:
-
-	DeferredRenderer();
+	ForwardRenderer();
 
 	void init() override;
 	void preprocess() override;
@@ -27,7 +14,7 @@ public:
 	void resize(glm::vec2 renderSize) override;
 
 	void setCameraAspectRatio(float aspectRatio) override;
-	uint32_t getFinalTexture() override { return m_lightingTexture; }
+	uint32_t getFinalTexture() override { return m_finalTexture; }
 
 	// models
 	std::vector<Model>& getModels() override { return m_models; }
@@ -46,26 +33,18 @@ public:
 	std::filesystem::path modelPath = "res/models/spaceman/spaceman.obj";
 
 private:
-	void createGbuffer();
-	void createLightingFramebuffer();
-
-	void geometryPass();
-	void lightingPass();
-
-	// quad
-	uint32_t m_quadVAO;
-	uint32_t m_quadVBO;
-
-	// Gbuffer
-	GBuffer m_gBuffer;
-
-	// lighting framebuffer
-	uint32_t m_lightingFramebuffer;
-	uint32_t m_lightingTexture;
+	void createFinalBuffer();
 
 	// properties
 	float m_aspectRatio;
 	glm::vec2 m_renderSize;
+
+	// framebuffers
+	uint32_t m_finalFrambufferWidth;
+	uint32_t m_finalFrambufferHeight;
+	uint32_t m_finalFramebuffer;
+	uint32_t m_finalTexture;
+	uint32_t m_depthBuffer;
 
 	// scene
 	std::vector<Model> m_models;

@@ -49,11 +49,11 @@ target_include_directories(ImGuiFileDialog PUBLIC ${IMGUIFILEDIALOG_DIR})
 # Core and utility source files
 set(CORE_SOURCES
 
-    "src/render/renderer.cpp" 
-    "src/render/renderer.h"
+    "src/render/forwardRenderer.cpp" 
+    "src/render/forwardRenderer.h"
     "src/core/application.cpp" 
     "src/core/application.h"
- "src/render/deferredRenderer.cpp" "src/render/deferredRenderer.h")
+ "src/render/deferredRenderer.cpp" "src/render/deferredRenderer.h" "src/render/renderer.h" "src/render/gbuffer.h")
 
  set(RENDER_SOURCES
     "src/model/model.h"

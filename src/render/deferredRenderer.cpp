@@ -7,9 +7,10 @@
 
 DeferredRenderer::DeferredRenderer() :
 	m_camera(Camera(glm::vec3(0.0f, 1.0f, 2.0f), -90.0f, 0.0f, 3.0f, 0.05f)),
-	m_aspectRatio(16.0f / 9.0f), m_finalFrambufferWidth(800), m_finalFrambufferHeight(600),
-	m_finalFramebuffer(0), m_finalTexture(0), m_depthStencilBuffer(0), m_shaderManager(ShaderManager()), m_lightManager(LightManager()),
-	m_skyBox(SkyBox()), m_gBuffer(0), m_gWorldPositionTex(0), m_gWorldNormalTex(0), m_gAlbedoTex(0), m_gRoughnessMetalnessAoTex(0), m_gEmissionTex(0)
+	m_aspectRatio(16.0f / 9.0f),
+	m_lightingFramebuffer(0), m_lightingTexture(0), m_shaderManager(ShaderManager()), m_lightManager(LightManager()),
+	m_skyBox(SkyBox()), m_gBuffer(),
+	m_renderSize(800, 600)
 {
 }
 
@@ -18,7 +19,7 @@ void DeferredRenderer::init()
 	m_models.push_back(Model(modelPath, ModelType::OPAQUE));
 
 	m_shaderManager.buildShader(ShaderName::GBUFFER, "shader/deferred/geo_vert.glsl", "shader/deferred/geo_frag.glsl");
-	m_shaderManager.buildShader(ShaderName::PBR, "shader/pbr/pbr_vert.glsl", "shader/pbr/pbr_frag.glsl");
+	m_shaderManager.buildShader(ShaderName::PBR, "shader/deferred/pbr/deferred_vert.glsl", "shader/deferred/pbr/deferred_pbr_frag.glsl");
 	m_shaderManager.buildShader(ShaderName::SKYBOX, "shader/skybox/skybox_vert.glsl", "shader/skybox/skybox_frag.glsl");
 	m_shaderManager.buildComputeShader(ShaderName::CONVOLUTION, "shader/pbr/convolve_cubemap.glsl");
 	m_shaderManager.buildComputeShader(ShaderName::PREFILTER, "shader/pbr/prefilter_cubemap.glsl");
@@ -31,6 +32,10 @@ void DeferredRenderer::init()
 
 		m_lightManager.addLight(directionalLight);
 	}
+
+	// create framebuffers
+	createGbuffer();
+	createLightingFramebuffer();
 }
 
 void DeferredRenderer::preprocess()
@@ -60,8 +65,9 @@ void DeferredRenderer::draw(glm::vec2 renderSize)
 	// geometry pass
 	geometryPass();
 
+	// lighting pass on quad
+	lightingPass();	
 
-	// draw skybox
 	m_skyBox.draw(glm::mat4(glm::mat3(m_camera.getViewMatrix())), m_camera.getProjectionMatrix(), m_shaderManager.getShader(ShaderName::SKYBOX));
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -73,6 +79,7 @@ void DeferredRenderer::resize(glm::vec2 renderSize)
 	m_renderSize = renderSize;
 
 	createGbuffer();
+	createLightingFramebuffer();
 }
 
 void DeferredRenderer::setCameraAspectRatio(float aspectRatio)
@@ -82,62 +89,77 @@ void DeferredRenderer::setCameraAspectRatio(float aspectRatio)
 
 void DeferredRenderer::createGbuffer()
 {
-	glGenFramebuffers(1, &m_gBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
+	glGenFramebuffers(1, &m_gBuffer.fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer.fbo);
 
 	// position color buffer
-	glGenTextures(1, &m_gWorldPositionTex);
-	glBindTexture(GL_TEXTURE_2D, m_gWorldPositionTex);
+	glGenTextures(1, &m_gBuffer.worldPosTex);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer.worldPosTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_renderSize.x, m_renderSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_gWorldPositionTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_gBuffer.worldPosTex, 0);
 
 	// normal color buffer
-	glGenTextures(1, &m_gWorldNormalTex);
-	glBindTexture(GL_TEXTURE_2D, m_gWorldNormalTex);
+	glGenTextures(1, &m_gBuffer.worldNormalTex);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer.worldNormalTex);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_renderSize.x, m_renderSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_gWorldNormalTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_gBuffer.worldNormalTex, 0);
 
 	// albedo color buffer
-	glGenTextures(1, &m_gAlbedoTex);
-	glBindTexture(GL_TEXTURE_2D, m_gAlbedoTex);
+	glGenTextures(1, &m_gBuffer.albedoTex);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer.albedoTex);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_renderSize.x, m_renderSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_gAlbedoTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_gBuffer.albedoTex, 0);
 
 	// roughness, metallic, ao color buffer
-	glGenTextures(1, &m_gRoughnessMetalnessAoTex);
-	glBindTexture(GL_TEXTURE_2D, m_gRoughnessMetalnessAoTex);
+	glGenTextures(1, &m_gBuffer.roughnessMetalnessAoTex);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer.roughnessMetalnessAoTex);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_renderSize.x, m_renderSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_gRoughnessMetalnessAoTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_gBuffer.roughnessMetalnessAoTex, 0);
+
+	// emission color buffer
+	glGenTextures(1, &m_gBuffer.emissionTex);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer.emissionTex);
+	
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_renderSize.x, m_renderSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, m_gBuffer.emissionTex, 0);
+
+	// Create depth-stencil texture
+	glGenTextures(1, &m_gBuffer.depthStencilTex);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer.depthStencilTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, m_renderSize.x, m_renderSize.y, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+
+	// Set texture parameters as necessary
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_gBuffer.depthStencilTex, 0);
 
 	// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
-	unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-	glDrawBuffers(4, attachments);
-
-	// depth stencil buffer
-	glGenRenderbuffers(1, &m_depthStencilBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, m_depthStencilBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_renderSize.x, m_renderSize.y);
-
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depthStencilBuffer);
+	unsigned int attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+	glDrawBuffers(5, attachments);
 
 	// check if framebuffer is complete
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -148,10 +170,60 @@ void DeferredRenderer::createGbuffer()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void DeferredRenderer::createLightingFramebuffer()
+{
+	glGenTextures(1, &m_lightingTexture);
+	glBindTexture(GL_TEXTURE_2D, m_lightingTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_renderSize.x, m_renderSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // minification filter
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // magnification filter
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// init light framebuffer
+	glGenFramebuffers(1, &m_lightingFramebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_lightingFramebuffer);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_lightingTexture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_gBuffer.depthStencilTex, 0);
+
+	// check if framebuffer is complete
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// create quad for lighting pass
+	float quadVertices[] = 
+	{
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f,
+	};
+
+	glGenVertexArrays(1, &m_quadVAO);
+	glGenBuffers(1, &m_quadVBO);
+	glBindVertexArray(m_quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	glBindVertexArray(0);
+}
+
 void DeferredRenderer::geometryPass()
 {
 	// bind framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer.fbo);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
 
@@ -174,7 +246,8 @@ void DeferredRenderer::geometryPass()
 
 				Material material = model.getMaterials()[entry.materialIndex];
 				material.setShader(m_shaderManager.getShader(ShaderName::GBUFFER));
-				material.use(model.getModelMatrix(), m_camera.getProjectionMatrix() * m_camera.getViewMatrix(), m_camera.getPosition());
+				material.useGeometryPass(model.getModelMatrix(), 
+					m_camera.getProjectionMatrix() * m_camera.getViewMatrix());
 
 				glDrawElementsBaseVertex(GL_TRIANGLES,
 					entry.numIndices,
@@ -187,4 +260,63 @@ void DeferredRenderer::geometryPass()
 			glBindVertexArray(0);
 		}
 	}
+}
+
+void DeferredRenderer::lightingPass()
+{
+	// bind framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, m_lightingFramebuffer);
+	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
+
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
+
+	std::shared_ptr<Shader> shader = m_shaderManager.getShader(ShaderName::PBR);
+	shader->bind();
+
+	shader->setUniform("cameraPos", m_camera.getPosition());
+
+	// bind gbuffer textures
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer.worldPosTex);
+	shader->setUniform("gWorldPos", 0);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer.worldNormalTex);
+	shader->setUniform("gWorldNormal", 1);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer.albedoTex);
+	shader->setUniform("gAlbedo", 2);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer.roughnessMetalnessAoTex);
+	shader->setUniform("gRoughnessMetalnessAo", 3);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer.emissionTex);
+	shader->setUniform("gEmission", 4);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, m_gBuffer.depthStencilTex);
+	shader->setUniform("gDepth", 5);
+
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyBox.getIrradianceMapID());
+	shader->setUniform("irradianceMap", 6);
+
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyBox.getPrefilterMapID());
+	shader->setUniform("prefilterMap", 7);
+
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, m_skyBox.getBRDFLUTTexture());
+	shader->setUniform("brdfLUT", 8);
+
+	// bind light data
+	m_lightManager.updateShader(m_shaderManager.getShader(ShaderName::PBR));
+
+	// draw quad
+	glBindVertexArray(m_quadVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glBindVertexArray(0);
+
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
 }
