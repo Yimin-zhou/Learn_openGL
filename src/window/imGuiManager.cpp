@@ -5,6 +5,7 @@
 #include "ImGuiFileDialog.h"
 
 #include "material/shader.h"
+#include "render/gbuffer.h"
 
 #include <ImGuizmo.h>
 
@@ -84,7 +85,6 @@ void ImGuiManager::draw(uint32_t texture)
 		auto& camera = m_renderer->getCamera();
 		// Render scene
 		ImGui::Begin("Scene");
-
 	
 		ImVec2 windowSize = ImGui::GetContentRegionAvail(); // Get the size of the window
 		ImVec2 windowPos = ImGui::GetWindowPos();
@@ -214,10 +214,26 @@ void ImGuiManager::draw(uint32_t texture)
 		ImGui::Text("Performance:");
 		ImGui::Text(" %.3f ms , %.1f FPS", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Separator();
-		ImGui::Text("PBR Precomputed Textures:");
-		ImGui::Text("BRDF LUT:");
-		ImGui::Image((void*)m_renderer->getSkyBox().getBRDFLUTTexture(), ImVec2(128, 128));
 
+		std::shared_ptr<DeferredRenderer> renderer = std::static_pointer_cast<DeferredRenderer>(m_renderer);
+
+		if (renderer)
+		{
+			GBuffer gBuffer = renderer->getGBuffer();
+			ImGui::Text("Deferred Pipeline G-Buffer");
+			ImGui::Text("World Position: ");
+			ImGui::Image((void*)(intptr_t)gBuffer.getWorldPosTex(), ImVec2(480, 270), ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Text("World Normal: ");
+			ImGui::Image((void*)(intptr_t)gBuffer.getWorldNormalTex(), ImVec2(480, 270), ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Text("Albedo: ");
+			ImGui::Image((void*)(intptr_t)gBuffer.getAlbedoTex(), ImVec2(480, 270), ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Text("RoughnessMetalnessAO: ");
+			ImGui::Image((void*)(intptr_t)gBuffer.getRoughnessMetalnessAoTex(), ImVec2(480, 270), ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Text("Emission: ");
+			ImGui::Image((void*)(intptr_t)gBuffer.getEmissionTex(), ImVec2(480, 270), ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Text("DepthStencil: ");
+			ImGui::Image((void*)(intptr_t)gBuffer.getDepthStencilTex(), ImVec2(480, 270), ImVec2(0, 1), ImVec2(1, 0));
+		}
 		ImGui::End();
 	}
 

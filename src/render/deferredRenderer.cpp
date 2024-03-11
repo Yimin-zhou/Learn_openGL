@@ -95,7 +95,7 @@ void DeferredRenderer::createGbuffer()
 	// position color buffer
 	glGenTextures(1, &m_gBuffer.worldPosTex);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer.worldPosTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_renderSize.x, m_renderSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_renderSize.x, m_renderSize.y, 0, GL_RGBA, GL_FLOAT, nullptr);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -106,7 +106,7 @@ void DeferredRenderer::createGbuffer()
 	glGenTextures(1, &m_gBuffer.worldNormalTex);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer.worldNormalTex);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_renderSize.x, m_renderSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_renderSize.x, m_renderSize.y, 0, GL_RGBA, GL_FLOAT, nullptr);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -117,7 +117,7 @@ void DeferredRenderer::createGbuffer()
 	glGenTextures(1, &m_gBuffer.albedoTex);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer.albedoTex);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_renderSize.x, m_renderSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_renderSize.x, m_renderSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -128,7 +128,7 @@ void DeferredRenderer::createGbuffer()
 	glGenTextures(1, &m_gBuffer.roughnessMetalnessAoTex);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer.roughnessMetalnessAoTex);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_renderSize.x, m_renderSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_renderSize.x, m_renderSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -139,7 +139,7 @@ void DeferredRenderer::createGbuffer()
 	glGenTextures(1, &m_gBuffer.emissionTex);
 	glBindTexture(GL_TEXTURE_2D, m_gBuffer.emissionTex);
 	
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_renderSize.x, m_renderSize.y, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_renderSize.x, m_renderSize.y, 0, GL_RGBA, GL_FLOAT, nullptr);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -225,6 +225,7 @@ void DeferredRenderer::geometryPass()
 	// bind framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, m_gBuffer.fbo);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
 
 	glEnable(GL_DEPTH_TEST);

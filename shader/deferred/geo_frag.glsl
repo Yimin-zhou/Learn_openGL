@@ -10,11 +10,11 @@ in VS_OUT
     mat3 TBN_World;
 } fs_in;
 
-layout (location = 0) out vec3 gWorlPos;
-layout (location = 1) out vec3 gWorldNormal;
-layout (location = 2) out vec3 gAlbedo;
-layout (location = 3) out vec3 gRoughnessMetalnessAo;
-layout (location = 4) out vec3 gEmission; 
+layout (location = 0) out vec4 gWorlPos;
+layout (location = 1) out vec4 gWorldNormal;
+layout (location = 2) out vec4 gAlbedo;
+layout (location = 3) out vec4 gRoughnessMetalnessAo;
+layout (location = 4) out vec4 gEmission; 
 
 uniform vec4 baseColor;
 uniform float roughnessStrength;
@@ -34,9 +34,9 @@ void main()
     float ao        = texture(aoMap, fs_in.fragTexCoord).g;
     vec3 normal = normalize(fs_in.TBN_World * (texture(normalMap, fs_in.fragTexCoord).rgb * 2.0 - 1.0));
 
-    gWorlPos = fs_in.fragPosWorld;
-    gWorldNormal = normal;
-    gAlbedo = albedo;
-    gRoughnessMetalnessAo = vec3(roughness, metalness, ao);
-    gEmission = vec3(0.0);
+    gWorlPos = vec4(fs_in.fragPosWorld, 1.0);
+    gWorldNormal = vec4(normal, 1.0);
+    gAlbedo = vec4(albedo, 1.0);
+    gRoughnessMetalnessAo = vec4(roughness, metalness, ao, 1.0);
+    gEmission = vec4(0.0, 0.0, 0.0, 1.0);
 }

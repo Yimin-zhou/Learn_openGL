@@ -28,18 +28,12 @@ public:
 
 	void setCameraAspectRatio(float aspectRatio) override;
 	uint32_t getFinalTexture() override { return m_lightingTexture; }
-
-	// models
 	std::vector<Model>& getModels() override { return m_models; }
-
-	// camera
 	Camera& getCamera() override { return m_camera; }
-
-	// lightings
 	LightManager& getLightManager() override { return m_lightManager; }
-
-	// skybox
 	SkyBox& getSkyBox() override { return m_skyBox; }
+
+	const GBuffer& getGBuffer() { return m_gBuffer; }
 
 public:
 	// scene model path 
