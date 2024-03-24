@@ -53,7 +53,7 @@ set(CORE_SOURCES
     "src/render/forwardRenderer.h"
     "src/core/application.cpp" 
     "src/core/application.h"
- "src/render/deferredRenderer.cpp" "src/render/deferredRenderer.h" "src/render/renderer.h" "src/render/gbuffer.h")
+ "src/render/deferredRenderer.cpp" "src/render/deferredRenderer.h" "src/render/renderer.h" "src/render/gbuffer.h" "src/render/shadow.h" "src/render/shadow.cpp")
 
  set(RENDER_SOURCES
     "src/model/model.h"

@@ -234,6 +234,11 @@ void ImGuiManager::draw(uint32_t texture)
 			ImGui::Text("DepthStencil: ");
 			ImGui::Image((void*)(intptr_t)gBuffer.getDepthStencilTex(), ImVec2(480, 270), ImVec2(0, 1), ImVec2(1, 0));
 		}
+
+		ImGui::Separator();
+		ImGui::Text("Shadow Map:");
+	ImGui::Image((void*)(intptr_t)renderer->getShadowMap(), ImVec2(480, 270), ImVec2(0, 1), ImVec2(1, 0));
+
 		ImGui::End();
 	}
 

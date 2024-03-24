@@ -16,6 +16,9 @@ uniform samplerCube irradianceMap;
 uniform samplerCube prefilterMap;
 uniform sampler2D brdfLUT;
 
+uniform mat4 lightSpaceMatrix;
+uniform sampler2D shadowMap;
+
 // Directional light struct
 struct DirectionalLight 
 {
@@ -207,24 +210,46 @@ vec3 ToneMapACES(vec3 color)
     return clamp((color * (A * color + B)) / (color * (C * color + D) + E), 0.0, 1.0);
 }
 
+float ShadowCalculation(vec4 fragPosLightSpace, vec3 n, vec3 l)
+{
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    float bias = max(0.05 * (1.0 - dot(n, l)), 0.005);  
+    float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;  
+    if(projCoords.z > 1.0)
+        shadow = 0.0;
+    return shadow;
+}
+
+vec3 visualizeDepth(float depth)
+{
+    const float near = 1.0; // Near clipping plane
+    const float far = 100.0; // Far clipping plane
+    float z = depth * 2.0 - 1.0; // Back to NDC
+    float linearDepth = (2.0 * near) / (far + near - z * (far - near));
+    return vec3(linearDepth);
+}
+
 void main()
 {
     vec3 albedo = texture(gAlbedo, fragTexcoords).rgb;
     vec3 normal = texture(gWorldNormal, fragTexcoords).rgb;
-    vec3 position = texture(gWorldPos, fragTexcoords).rgb;
+    vec3 worldPosition = texture(gWorldPos, fragTexcoords).rgb;
     vec3 rma = texture(gRoughnessMetalnessAo, fragTexcoords).rgb;
     vec3 emission = texture(gEmission, fragTexcoords).rgb;
     float depth  = texture(gDepth, fragTexcoords).r; // TODO, rerange this
-    float ndc = depth * 2.0 - 1.0; 
-    float linearDepth = (2.0 * 0.01 * 1000.0) / (1000.0 + 0.01 - ndc * (1000.0 - 0.01));	
-    depth = linearDepth / 1000.0;
     
     float roughness = rma.r;
     float metalness = rma.g;
     float ao = rma.b;
     
     vec3 N = normal;
-    vec3 V = normalize(cameraPos - position);
+    vec3 V = normalize(cameraPos - worldPosition);
 
     vec3 F0 = vec3(0.04); // common value for non-metallic objects
     F0 = mix(F0, albedo, metalness);
@@ -236,32 +261,16 @@ void main()
     // directional light
     Lo += CalcDirectionalLight(directionalLight, N, V, albedo, roughness, metalness, F0);
 
-    // Shadow calculation.
-//    vec4 shadowCoord = lightSpaceMatrix * vec4(fragPosition, 1.0); // Light space position
-//    shadowCoord /= shadowCoord.w; // Perspective divide
-//    shadowCoord = shadowCoord * 0.5 + 0.5; // Convert to [0, 1] range
-//    float closestDepth = texture(shadowMap, shadowCoord.xy).r; // Read depth from texture
-//    float currentDepth = shadowCoord.z; // Depth of current fragment in light space
-//    float bias = 0.005; // Bias to avoid shadow acne
-//    
-//    float shadow = 0.0;
-//    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-//    for(int x = -2; x <= 2; ++x)
-//    {
-//        for(int y = -2; y <= 2; ++y)
-//        {
-//            float pcfDepth = texture(shadowMap, shadowCoord.xy + vec2(x, y) * texelSize).r; 
-//            shadow += currentDepth - bias> pcfDepth ? 0.0 : 1.0;        
-//        }    
-//    }
-//    shadow /= 9.0;
-//    Lo *= shadow;
+    // Shadow calculation
+    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(worldPosition, 1.0);
+    float shadow = ShadowCalculation(fragPosLightSpace, N, directionalLight.direction);
+    Lo *= (1 - shadow);
 
     // point
     int numPointLights = min(activePointLights, MAX_POINT_LIGHTS);
     for(int i = 0; i < numPointLights; i++)
 	{
-		Lo += CalcPointLight(pointLights[i], N, V, position, albedo, roughness, metalness, F0);
+		Lo += CalcPointLight(pointLights[i], N, V, worldPosition, albedo, roughness, metalness, F0);
 	}
 
     // spot

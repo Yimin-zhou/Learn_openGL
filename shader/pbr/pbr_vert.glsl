@@ -7,11 +7,13 @@ layout (location = 4) in vec3 aBitangent;
 
 uniform mat4 modelMatrix;
 uniform mat4 projectionViewMatrix;
+uniform mat4 lightSpaceMatrix;
 
 out VS_OUT
 {
 	vec3 fragPosLocal;
 	vec3 fragPosWorld;
+    vec4 fragPosLightSpace;
 	vec3 fragNormalWorld;
 	vec2 fragTexCoord;
     vec3 fragTangentWorld;
@@ -23,6 +25,7 @@ void main()
     gl_Position = projectionViewMatrix * modelMatrix * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     vs_out.fragPosLocal = aPos;
     vs_out.fragPosWorld = (modelMatrix * vec4(aPos, 1.0)).xyz;
+    vs_out.fragPosLightSpace = (lightSpaceMatrix * modelMatrix * vec4(aPos, 1.0));
     vs_out.fragTexCoord = vec2(aTexCoord.x, aTexCoord.y);
     vs_out.fragNormalWorld = normalize((modelMatrix * vec4(aNormal, 0.0)).xyz);
     vs_out.fragTangentWorld = normalize((modelMatrix * vec4(aTangent, 0.0)).xyz);

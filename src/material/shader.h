@@ -19,6 +19,7 @@ enum class ShaderName
 	PBR,
 
 	SKYBOX,
+	SHADOW,
 
 	GBUFFER,
 	CONVOLUTION,
@@ -76,6 +77,7 @@ public:
 	ShaderManager() = default;
 
 	void buildShader(ShaderName name, const std::filesystem::path& vertexPath, const std::filesystem::path& fragPath);
+	void buildShader(ShaderName name, const std::filesystem::path& vertexPath);
 	void buildComputeShader(ShaderName name, const std::filesystem::path& computePath);
 	std::shared_ptr<Shader> getShader(ShaderName name) const;
 

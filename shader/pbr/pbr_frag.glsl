@@ -4,6 +4,7 @@ in VS_OUT
 {
 	vec3 fragPosLocal;
 	vec3 fragPosWorld;
+    vec4 fragPosLightSpace;
 	vec3 fragNormalWorld;
 	vec2 fragTexCoord;
     vec3 fragTangentWorld;
@@ -27,6 +28,8 @@ uniform vec3 cameraPos;
 uniform samplerCube irradianceMap;
 uniform samplerCube prefilterMap;
 uniform sampler2D brdfLUT;
+
+uniform sampler2D shadowMap;
 
 
 // Directional light struct
@@ -217,6 +220,20 @@ vec3 ToneMapACES(vec3 color)
     return clamp((color * (A * color + B)) / (color * (C * color + D) + E), 0.0, 1.0);
 }
 
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+
+    return shadow;
+}
+
 void main()
 {
     vec3 albedo     = pow(texture(albedoMap, fs_in.fragTexCoord).rgb, vec3(2.2)) * baseColor.rgb; // srgb texture, remove gamma correction, cause light is cauculated in linear
@@ -239,25 +256,7 @@ void main()
     Lo += CalcDirectionalLight(directionalLight, N, V, albedo, roughness, metalness, F0);
 
     // Shadow calculation.
-//    vec4 shadowCoord = lightSpaceMatrix * vec4(fragPosition, 1.0); // Light space position
-//    shadowCoord /= shadowCoord.w; // Perspective divide
-//    shadowCoord = shadowCoord * 0.5 + 0.5; // Convert to [0, 1] range
-//    float closestDepth = texture(shadowMap, shadowCoord.xy).r; // Read depth from texture
-//    float currentDepth = shadowCoord.z; // Depth of current fragment in light space
-//    float bias = 0.005; // Bias to avoid shadow acne
-//    
-//    float shadow = 0.0;
-//    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-//    for(int x = -2; x <= 2; ++x)
-//    {
-//        for(int y = -2; y <= 2; ++y)
-//        {
-//            float pcfDepth = texture(shadowMap, shadowCoord.xy + vec2(x, y) * texelSize).r; 
-//            shadow += currentDepth - bias> pcfDepth ? 0.0 : 1.0;        
-//        }    
-//    }
-//    shadow /= 9.0;
-//    Lo *= shadow;
+    float shadow = ShadowCalculation(fs_in.fragPosLightSpace);
 
     // point
     int numPointLights = min(activePointLights, MAX_POINT_LIGHTS);
@@ -304,7 +303,7 @@ void main()
     vec3 kd = albedo * (1.0 - FssEss - FmsEms) * (1.0 - metalness);
     vec3 indirectLight = (FssEss * prefilteredColor + (FmsEms + kd) * irradiance) * ao;
 
-    vec3 color = indirectLight + Lo;
+    vec3 color = (indirectLight + Lo) * (1.0 - shadow);
     color = ToneMapACES(color);
     color = pow(vec3(color), vec3(1.0/2.2)); // gamma correction
 

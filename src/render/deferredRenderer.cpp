@@ -8,7 +8,7 @@
 DeferredRenderer::DeferredRenderer() :
 	m_camera(Camera(glm::vec3(0.0f, 1.0f, 2.0f), -90.0f, 0.0f, 3.0f, 0.05f)),
 	m_aspectRatio(16.0f / 9.0f),
-	m_lightingFramebuffer(0), m_lightingTexture(0), m_shaderManager(ShaderManager()), m_lightManager(LightManager()),
+	m_lightingFBO(0), m_lightingTexture(0), m_shaderManager(ShaderManager()), m_lightManager(LightManager()),
 	m_skyBox(SkyBox()), m_gBuffer(),
 	m_renderSize(800, 600)
 {
@@ -21,6 +21,7 @@ void DeferredRenderer::init()
 	m_shaderManager.buildShader(ShaderName::GBUFFER, "shader/deferred/geo_vert.glsl", "shader/deferred/geo_frag.glsl");
 	m_shaderManager.buildShader(ShaderName::PBR, "shader/deferred/pbr/deferred_vert.glsl", "shader/deferred/pbr/deferred_pbr_frag.glsl");
 	m_shaderManager.buildShader(ShaderName::SKYBOX, "shader/skybox/skybox_vert.glsl", "shader/skybox/skybox_frag.glsl");
+	m_shaderManager.buildShader(ShaderName::SHADOW, "shader/shadow/shadow_vert.glsl");
 	m_shaderManager.buildComputeShader(ShaderName::CONVOLUTION, "shader/pbr/convolve_cubemap.glsl");
 	m_shaderManager.buildComputeShader(ShaderName::PREFILTER, "shader/pbr/prefilter_cubemap.glsl");
 	m_shaderManager.buildComputeShader(ShaderName::PRE_BRDF, "shader/pbr/precompute_brdf.glsl");
@@ -52,6 +53,9 @@ void DeferredRenderer::preprocess()
 	m_skyBox.convolveCubemap(m_shaderManager.getShader(ShaderName::CONVOLUTION));
 	m_skyBox.prefilterCubemap(m_shaderManager.getShader(ShaderName::PREFILTER));
 	m_skyBox.generateBRDFLUTTexture(m_shaderManager.getShader(ShaderName::PRE_BRDF));
+
+	// shadow
+	m_shadow = Shadow(2048, 2048);
 }
 
 void DeferredRenderer::update(std::shared_ptr<Window> window, float deltaTime)
@@ -62,6 +66,9 @@ void DeferredRenderer::update(std::shared_ptr<Window> window, float deltaTime)
 void DeferredRenderer::draw(glm::vec2 renderSize)
 {
 	if (m_renderSize != renderSize) m_renderSize = renderSize;
+	// shadow pass
+	shadowPass();
+
 	// geometry pass
 	geometryPass();
 
@@ -180,8 +187,8 @@ void DeferredRenderer::createLightingFramebuffer()
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// init light framebuffer
-	glGenFramebuffers(1, &m_lightingFramebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_lightingFramebuffer);
+	glGenFramebuffers(1, &m_lightingFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_lightingFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_lightingTexture, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_gBuffer.depthStencilTex, 0);
 
@@ -218,6 +225,11 @@ void DeferredRenderer::createLightingFramebuffer()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
 	glBindVertexArray(0);
+}
+
+void DeferredRenderer::shadowPass()
+{
+	m_shadow.renderShadowMap(m_models, m_shaderManager.getShader(ShaderName::SHADOW), m_lightManager.getDirectionalLight()->getDirection());
 }
 
 void DeferredRenderer::geometryPass()
@@ -266,7 +278,7 @@ void DeferredRenderer::geometryPass()
 void DeferredRenderer::lightingPass()
 {
 	// bind framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, m_lightingFramebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_lightingFBO);
 	glViewport(0, 0, m_renderSize.x, m_renderSize.y);
 
 	glDepthMask(GL_FALSE);
@@ -308,6 +320,12 @@ void DeferredRenderer::lightingPass()
 	glActiveTexture(GL_TEXTURE8);
 	glBindTexture(GL_TEXTURE_2D, m_skyBox.getBRDFLUTTexture());
 	shader->setUniform("brdfLUT", 8);
+
+	// bind shadow map
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D, m_shadow.getShadowMap());
+	shader->setUniform("shadowMap", 9);
+	shader->setUniform("lightSpaceMatrix", m_shadow.getLightSpaceMatrix());
 
 	// bind light data
 	m_lightManager.updateShader(m_shaderManager.getShader(ShaderName::PBR));

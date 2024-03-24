@@ -239,6 +239,13 @@ void ShaderManager::buildShader(ShaderName name, const std::filesystem::path& ve
 	m_shaders[name] = defaultShaderBuilder.build();
 }
 
+void ShaderManager::buildShader(ShaderName name, const std::filesystem::path& vertexPath)
+{
+	ShaderBuilder defaultShaderBuilder;
+	defaultShaderBuilder.addStage(GL_VERTEX_SHADER, vertexPath);
+	m_shaders[name] = defaultShaderBuilder.build();
+}
+
 void ShaderManager::buildComputeShader(ShaderName name, const std::filesystem::path& computePath)
 {
 	ShaderBuilder computeShaderBuilder;

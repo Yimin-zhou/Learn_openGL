@@ -6,6 +6,7 @@
 #include "model/model.h"
 #include "camera/camera.h"
 #include "render/light/LightManager.h"
+#include "render/shadow.h"
 #include "effects/skyBox.h"
 #include "gBuffer.h"
 #include "renderer.h"
@@ -16,7 +17,6 @@
 class DeferredRenderer : public Renderer
 {
 public:
-
 	DeferredRenderer();
 
 	void init() override;
@@ -35,6 +35,9 @@ public:
 
 	const GBuffer& getGBuffer() { return m_gBuffer; }
 
+	// shadow
+	uint32_t getShadowMap() { return m_shadow.getShadowMap(); }
+
 public:
 	// scene model path 
 	std::filesystem::path modelPath = "res/models/spaceman/spaceman.obj";
@@ -43,6 +46,7 @@ private:
 	void createGbuffer();
 	void createLightingFramebuffer();
 
+	void shadowPass();
 	void geometryPass();
 	void lightingPass();
 
@@ -54,7 +58,7 @@ private:
 	GBuffer m_gBuffer;
 
 	// lighting framebuffer
-	uint32_t m_lightingFramebuffer;
+	uint32_t m_lightingFBO;
 	uint32_t m_lightingTexture;
 
 	// properties
@@ -69,5 +73,8 @@ private:
 
 	// skybox
 	SkyBox m_skyBox;
+
+	// shadow
+	Shadow m_shadow;
 
 };
