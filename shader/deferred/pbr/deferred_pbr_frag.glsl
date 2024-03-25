@@ -58,28 +58,74 @@ struct SpotLight
 #define MAX_SPOT_LIGHTS 100
 
 // PCSS
-#define BLOCKER_SEARCH_NUM_SAMPLES 16
-#define PCF_NUM_SAMPLES 16 
+#define BLOCKER_SEARCH_NUM_SAMPLES 64
+#define PCF_NUM_SAMPLES 64 
 
-vec2 poissonDisk[16] = 
-{
-     vec2( -0.94201624, -0.39906216 ),
-     vec2( 0.94558609, -0.76890725 ),
-     vec2( -0.094184101, -0.92938870 ),
-     vec2( 0.34495938, 0.29387760 ),
-     vec2( -0.91588581, 0.45771432 ),
-     vec2( -0.81544232, -0.87912464 ),
-     vec2( -0.38277543, 0.27676845 ),
-     vec2( 0.97484398, 0.75648379 ),
-     vec2( 0.44323325, -0.97511554 ),
-     vec2( 0.53742981, -0.47373420 ),
-     vec2( -0.26496911, -0.41893023 ),
-     vec2( 0.79197514, 0.19090188 ),
-     vec2( -0.24188840, 0.99706507 ),
-     vec2( -0.81409955, 0.91437590 ),
-     vec2( 0.19984126, 0.78641367 ),
-     vec2( 0.14383161, -0.14100790 )
- };
+const vec2 poisson64[64] = vec2[](
+    vec2(-0.934812, 0.366741),
+    vec2(-0.918943, -0.0941496),
+    vec2(-0.873226, 0.62389),
+    vec2(-0.8352, 0.937803),
+    vec2(-0.822138, -0.281655),
+    vec2(-0.812983, 0.10416),
+    vec2(-0.786126, -0.767632),
+    vec2(-0.739494, -0.535813),
+    vec2(-0.681692, 0.284707),
+    vec2(-0.61742, -0.234535),
+    vec2(-0.601184, 0.562426),
+    vec2(-0.607105, 0.847591),
+    vec2(-0.581835, -0.00485244),
+    vec2(-0.554247, -0.771111),
+    vec2(-0.483383, -0.976928),
+    vec2(-0.476669, -0.395672),
+    vec2(-0.439802, 0.362407),
+    vec2(-0.409772, -0.175695),
+    vec2(-0.367534, 0.102451),
+    vec2(-0.35313, 0.58153),
+    vec2(-0.341594, -0.737541),
+    vec2(-0.275979, 0.981567),
+    vec2(-0.230811, 0.305094),
+    vec2(-0.221656, 0.751152),
+    vec2(-0.214393, -0.0592364),
+    vec2(-0.204932, -0.483566),
+    vec2(-0.183569, -0.266274),
+    vec2(-0.123936, -0.754448),
+    vec2(-0.0859096, 0.118625),
+    vec2(-0.0610675, 0.460555),
+    vec2(-0.0234687, -0.962523),
+    vec2(-0.00485244, -0.373394),
+    vec2(0.0213324, 0.760247),
+    vec2(0.0359813, -0.0834071),
+    vec2(0.0877407, -0.730766),
+    vec2(0.14597, 0.281045),
+    vec2(0.18186, -0.529649),
+    vec2(0.188208, -0.289529),
+    vec2(0.212928, 0.063509),
+    vec2(0.23661, 0.566027),
+    vec2(0.266579, 0.867061),
+    vec2(0.320597, -0.883358),
+    vec2(0.353557, 0.322733),
+    vec2(0.404157, -0.651479),
+    vec2(0.410443, -0.413068),
+    vec2(0.413556, 0.123325),
+    vec2(0.46556, -0.176183),
+    vec2(0.49266, 0.55388),
+    vec2(0.506333, 0.876888),
+    vec2(0.535875, -0.885556),
+    vec2(0.615894, 0.0703452),
+    vec2(0.637135, -0.637623),
+    vec2(0.677236, -0.174291),
+    vec2(0.67626, 0.7116),
+    vec2(0.686331, -0.389935),
+    vec2(0.691031, 0.330729),
+    vec2(0.715629, 0.999939),
+    vec2(0.8493, -0.0485549),
+    vec2(0.863582, -0.85229),
+    vec2(0.890622, 0.850581),
+    vec2(0.898068, 0.633778),
+    vec2(0.92053, -0.355693),
+    vec2(0.933348, -0.62981),
+    vec2(0.95294, 0.156896));
 
 uniform DirectionalLight directionalLight;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
@@ -257,7 +303,7 @@ float FindBlcokerDepth(out float blockerCount, vec2 shadowCoord, float lightSize
 
     for( int i = 0; i < BLOCKER_SEARCH_NUM_SAMPLES; ++i )
     {
-        float z = texture(shadowMap, shadowCoord.xy + poissonDisk[i] * searchWidth).r;
+        float z = texture(shadowMap, shadowCoord.xy + poisson64[i] * searchWidth).r;
         if( z < receiverDepth )
 		{
 			avgBlockerDepth += z;
@@ -274,7 +320,7 @@ float PCF_Filter( vec2 shadowCoord, float receiverDepth, float radius, float bia
 
     for ( int i = 0; i < PCF_NUM_SAMPLES; ++i )
     {
-        vec2 offset = poissonDisk[i] * radius;
+        vec2 offset = poisson64[i] * radius;
         float pcfDepth = texture(shadowMap, shadowCoord.xy + offset).r;
         sum += pcfDepth < receiverDepth - bias ? 1.0 : 0.0;
     }
@@ -287,7 +333,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 n, vec3 l)
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     float receiverDepth = projCoords.z;
-    float lightSize = 0.06;
+    float lightSize = 0.05;
     float NEAR = 1.0;
 
     // 1. blocker search
@@ -393,7 +439,7 @@ void main()
     vec3 Favg = F0 + (1.0 - F0) / 21.0;
     vec3 FmsEms = Ems * FssEss * Favg / (1.0 - Favg * Ems);
     vec3 kd = albedo * (1.0 - FssEss - FmsEms) * (1.0 - metalness);
-    vec3 indirectLight = (FssEss * prefilteredColor+ (FmsEms + kd) * irradiance) * ao;
+    vec3 indirectLight = (FssEss * prefilteredColor + (FmsEms + kd) * irradiance) * ao;
 
     vec3 color = indirectLight + Lo;
     color = ToneMapACES(color);
