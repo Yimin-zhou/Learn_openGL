@@ -11,14 +11,12 @@ void Shadow::renderShadowMap(std::vector<Model>& models, std::shared_ptr<Shader>
 	glBindFramebuffer(GL_FRAMEBUFFER, m_depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
 
 	shader->bind();
 
 	// only for directional light
-	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 6.5f);
-	glm::mat4 lightView = glm::lookAt(glm::normalize(lightDir) * 3.0f,
+	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 20.0f);
+	glm::mat4 lightView = glm::lookAt(glm::normalize(lightDir) * 10.0f,
 		glm::vec3(0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -47,7 +45,6 @@ void Shadow::renderShadowMap(std::vector<Model>& models, std::shared_ptr<Shader>
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glCullFace(GL_BACK);
 }
 
 void Shadow::createShadowMap()

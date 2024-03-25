@@ -57,6 +57,30 @@ struct SpotLight
 #define MAX_POINT_LIGHTS 100
 #define MAX_SPOT_LIGHTS 100
 
+// PCSS
+#define BLOCKER_SEARCH_NUM_SAMPLES 16
+#define PCF_NUM_SAMPLES 16 
+
+vec2 poissonDisk[16] = 
+{
+     vec2( -0.94201624, -0.39906216 ),
+     vec2( 0.94558609, -0.76890725 ),
+     vec2( -0.094184101, -0.92938870 ),
+     vec2( 0.34495938, 0.29387760 ),
+     vec2( -0.91588581, 0.45771432 ),
+     vec2( -0.81544232, -0.87912464 ),
+     vec2( -0.38277543, 0.27676845 ),
+     vec2( 0.97484398, 0.75648379 ),
+     vec2( 0.44323325, -0.97511554 ),
+     vec2( 0.53742981, -0.47373420 ),
+     vec2( -0.26496911, -0.41893023 ),
+     vec2( 0.79197514, 0.19090188 ),
+     vec2( -0.24188840, 0.99706507 ),
+     vec2( -0.81409955, 0.91437590 ),
+     vec2( 0.19984126, 0.78641367 ),
+     vec2( 0.14383161, -0.14100790 )
+ };
+
 uniform DirectionalLight directionalLight;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform int activePointLights;
@@ -210,19 +234,77 @@ vec3 ToneMapACES(vec3 color)
     return clamp((color * (A * color + B)) / (color * (C * color + D) + E), 0.0, 1.0);
 }
 
+
+float BlockerSearchWidth(float lightSize, float receiverDepth)
+{
+    float NEAR = 1.0;
+    float scale = 1.0;
+	return scale * lightSize * (receiverDepth - NEAR) / receiverDepth;
+}
+
+float PenumbraSize(float receiverDepth, float blockerDepth, float lightSize) 
+{
+    return lightSize * (receiverDepth - blockerDepth) / blockerDepth;
+}
+
+// blocker search
+float FindBlcokerDepth(out float blockerCount, vec2 shadowCoord, float lightSize, float receiverDepth)
+{
+    blockerCount = 0;
+    float avgBlockerDepth = 0.0;
+
+    float searchWidth = BlockerSearchWidth(lightSize, receiverDepth);
+
+    for( int i = 0; i < BLOCKER_SEARCH_NUM_SAMPLES; ++i )
+    {
+        float z = texture(shadowMap, shadowCoord.xy + poissonDisk[i] * searchWidth).r;
+        if( z < receiverDepth )
+		{
+			avgBlockerDepth += z;
+			++blockerCount;
+		}
+    }
+
+	return avgBlockerDepth;
+}
+
+float PCF_Filter( vec2 shadowCoord, float receiverDepth, float radius, float bias )
+{
+    float sum = 0.0;
+
+    for ( int i = 0; i < PCF_NUM_SAMPLES; ++i )
+    {
+        vec2 offset = poissonDisk[i] * radius;
+        float pcfDepth = texture(shadowMap, shadowCoord.xy + offset).r;
+        sum += pcfDepth < receiverDepth - bias ? 1.0 : 0.0;
+    }
+    return sum / float(PCF_NUM_SAMPLES);
+} 
+
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 n, vec3 l)
 {
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
+    float receiverDepth = projCoords.z;
+    float lightSize = 0.06;
+    float NEAR = 1.0;
 
-    float closestDepth = texture(shadowMap, projCoords.xy).r;
-    float currentDepth = projCoords.z;
+    // 1. blocker search
+    float blockerCount = 0;
+    float averageBlockerDepth = FindBlcokerDepth(blockerCount, projCoords.xy, lightSize, receiverDepth);
+    if (blockerCount == 0)
+		return 0.0;
+    averageBlockerDepth /= blockerCount;
 
+    // 2. estimate penumbra size
+    float penumbra = PenumbraSize(receiverDepth, averageBlockerDepth, lightSize);
+    float filterRadius = penumbra * lightSize * NEAR / receiverDepth;
+
+    // 3. PCF
     float bias = max(0.05 * (1.0 - dot(n, l)), 0.005);  
-    float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;  
-    if(projCoords.z > 1.0)
-        shadow = 0.0;
+    float shadow = PCF_Filter(projCoords.xy, receiverDepth, filterRadius, bias);
+
     return shadow;
 }
 
@@ -262,7 +344,8 @@ void main()
     Lo += CalcDirectionalLight(directionalLight, N, V, albedo, roughness, metalness, F0);
 
     // Shadow calculation
-    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(worldPosition, 1.0);
+    vec3 normalOffsetPos = worldPosition + N * 0.05;
+    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(normalOffsetPos, 1.0);
     float shadow = ShadowCalculation(fragPosLightSpace, N, directionalLight.direction);
     Lo *= (1 - shadow);
 
@@ -297,6 +380,7 @@ void main()
 
     // indirect (multiple scattering)
     vec3 irradiance = texture(irradianceMap, normal).rgb;
+
     vec3 ks = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
     vec3 R = reflect(-V, N);
     float mipLevel = roughness * 4.0;
@@ -309,7 +393,7 @@ void main()
     vec3 Favg = F0 + (1.0 - F0) / 21.0;
     vec3 FmsEms = Ems * FssEss * Favg / (1.0 - Favg * Ems);
     vec3 kd = albedo * (1.0 - FssEss - FmsEms) * (1.0 - metalness);
-    vec3 indirectLight = (FssEss * prefilteredColor + (FmsEms + kd) * irradiance) * ao;
+    vec3 indirectLight = (FssEss * prefilteredColor+ (FmsEms + kd) * irradiance) * ao;
 
     vec3 color = indirectLight + Lo;
     color = ToneMapACES(color);
