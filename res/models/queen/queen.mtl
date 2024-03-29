@@ -1,0 +1,62 @@
+# Blender 4.1.0 MTL File: 'queen.blend'
+# www.blender.org
+
+newmtl plane
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.500000
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+norm ../universalMaps/normal.png
+map_Kd ../universalMaps/albedo.png
+map_Pm ../universalMaps/metallic_black.png
+map_Pr ../universalMaps/roughness.png
+map_Ka ../universalMaps/ao.png
+
+newmtl eye
+Kd 1.0000 1.00000 1.00000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.500000
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+norm ../universalMaps/normal.png
+map_Kd ../universalMaps/albedo.png
+map_Pm ../universalMaps/metallic.png
+map_Pr ../universalMaps/roughness.png
+map_Ka ../universalMaps/ao.png
+
+
+newmtl skin
+Kd 0.800000 0.500000 0.500000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+norm Textures/Body Normal.png
+map_Kd Textures/Body diff.png
+map_Pm ../universalMaps/metallic_black.png
+map_Pr Textures/Body Roughness.png
+map_Ka Textures/Body AO.png
