@@ -25,7 +25,6 @@ struct DirectionalLight
     vec3 direction;
     vec3 color;
     float intensity;
-    float size;
 };
 
 // Point light struct
@@ -298,7 +297,7 @@ float PenumbraSize(float receiverDepth, float blockerDepth, float lightSize)
 float FindBlcokerDepth(out float blockerCount, vec2 shadowCoord, float lightSize, float receiverDepth)
 {
     blockerCount = 0;
-    float totalBlockerDepth = 0.0;
+    float avgBlockerDepth = 0.0;
 
     float searchWidth = BlockerSearchWidth(lightSize, receiverDepth);
 
@@ -307,12 +306,12 @@ float FindBlcokerDepth(out float blockerCount, vec2 shadowCoord, float lightSize
         float z = texture(shadowMap, shadowCoord.xy + poisson64[i] * searchWidth).r;
         if( z < receiverDepth )
 		{
-			totalBlockerDepth += z;
+			avgBlockerDepth += z;
 			++blockerCount;
 		}
     }
 
-	return totalBlockerDepth;
+	return avgBlockerDepth;
 }
 
 float PCF_Filter( vec2 shadowCoord, float receiverDepth, float radius, float bias )
@@ -328,28 +327,28 @@ float PCF_Filter( vec2 shadowCoord, float receiverDepth, float radius, float bia
     return sum / float(PCF_NUM_SAMPLES);
 } 
 
-float ShadowCalculation(vec4 fragPosLightSpace, vec3 n, vec3 l, float lightSize)
+float ShadowCalculation(vec4 fragPosLightSpace, vec3 n, vec3 l)
 {
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     float receiverDepth = projCoords.z;
+    float lightSize = 0.05;
     float NEAR = 1.0;
-    float size = lightSize * 0.001;
 
     // 1. blocker search
     float blockerCount = 0;
-    float averageBlockerDepth = FindBlcokerDepth(blockerCount, projCoords.xy, size, receiverDepth);
+    float averageBlockerDepth = FindBlcokerDepth(blockerCount, projCoords.xy, lightSize, receiverDepth);
     if (blockerCount == 0)
 		return 0.0;
     averageBlockerDepth /= blockerCount;
 
     // 2. estimate penumbra size
-    float penumbra = PenumbraSize(receiverDepth, averageBlockerDepth, size);
+    float penumbra = PenumbraSize(receiverDepth, averageBlockerDepth, lightSize);
+    float filterRadius = penumbra * lightSize * NEAR / receiverDepth;
 
     // 3. PCF
     float bias = max(0.05 * (1.0 - dot(n, l)), 0.005);  
-    float filterRadius = penumbra;
     float shadow = PCF_Filter(projCoords.xy, receiverDepth, filterRadius, bias);
 
     return shadow;
@@ -371,7 +370,7 @@ void main()
     vec3 worldPosition = texture(gWorldPos, fragTexcoords).rgb;
     vec3 rma = texture(gRoughnessMetalnessAo, fragTexcoords).rgb;
     vec3 emission = texture(gEmission, fragTexcoords).rgb;
-    float depth  = texture(gDepth, fragTexcoords).r;
+    float depth  = texture(gDepth, fragTexcoords).r; // TODO, rerange this
     
     float roughness = rma.r;
     float metalness = rma.g;
@@ -393,7 +392,7 @@ void main()
     // Shadow calculation
     vec3 normalOffsetPos = worldPosition + N * 0.05;
     vec4 fragPosLightSpace = lightSpaceMatrix * vec4(normalOffsetPos, 1.0);
-    float shadow = ShadowCalculation(fragPosLightSpace, N, directionalLight.direction, directionalLight.size);
+    float shadow = ShadowCalculation(fragPosLightSpace, N, directionalLight.direction);
     Lo *= (1 - shadow);
 
     // point

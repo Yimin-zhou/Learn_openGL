@@ -16,8 +16,6 @@ public:
 	void setCameraAspectRatio(float aspectRatio) override;
 	uint32_t getFinalTexture() override { return m_finalTexture; }
 
-	ShaderManager& getShaderManager() override { return m_shaderManager; }
-
 	// models
 	std::vector<Model>& getModels() override { return m_models; }
 

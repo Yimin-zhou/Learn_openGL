@@ -16,7 +16,7 @@ void Shadow::renderShadowMap(std::vector<Model>& models, std::shared_ptr<Shader>
 
 	// only for directional light
 	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 20.0f);
-	glm::mat4 lightView = glm::lookAt(glm::normalize(lightDir) * 6.0f,
+	glm::mat4 lightView = glm::lookAt(glm::normalize(lightDir) * 5.0f,
 		glm::vec3(0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f));
 

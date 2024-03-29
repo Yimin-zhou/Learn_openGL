@@ -5,19 +5,34 @@
 
 #include <glm/gtx/string_cast.hpp>
 
-DeferredRenderer::DeferredRenderer(std::shared_ptr<Scene> scene) :
+DeferredRenderer::DeferredRenderer() :
+	m_camera(Camera(glm::vec3(0.0f, 1.0f, 2.0f), -90.0f, 0.0f, 3.0f, 0.05f)),
 	m_aspectRatio(16.0f / 9.0f),
-	m_lightingFBO(0), m_lightingTexture(0),
-	m_gBuffer(),
-	m_renderSize(800, 600),
-	m_scene(scene)
+	m_lightingFBO(0), m_lightingTexture(0), m_shaderManager(ShaderManager()), m_lightManager(LightManager()),
+	m_skyBox(SkyBox()), m_gBuffer(),
+	m_renderSize(800, 600)
 {
 }
 
 void DeferredRenderer::init()
 {
-	// init scene
-	m_scene->init();
+	m_models.push_back(Model(modelPath, ModelType::OPAQUE));
+
+	m_shaderManager.buildShader(ShaderName::GBUFFER, "shader/deferred/geo_vert.glsl", "shader/deferred/geo_frag.glsl");
+	m_shaderManager.buildShader(ShaderName::PBR, "shader/deferred/pbr/deferred_vert.glsl", "shader/deferred/pbr/deferred_pbr_frag.glsl");
+	m_shaderManager.buildShader(ShaderName::SKYBOX, "shader/skybox/skybox_vert.glsl", "shader/skybox/skybox_frag.glsl");
+	m_shaderManager.buildShader(ShaderName::SHADOW, "shader/shadow/shadow_vert.glsl");
+	m_shaderManager.buildComputeShader(ShaderName::CONVOLUTION, "shader/pbr/convolve_cubemap.glsl");
+	m_shaderManager.buildComputeShader(ShaderName::PREFILTER, "shader/pbr/prefilter_cubemap.glsl");
+	m_shaderManager.buildComputeShader(ShaderName::PRE_BRDF, "shader/pbr/precompute_brdf.glsl");
+
+	// light
+	{
+		std::shared_ptr<DirectionalLight> directionalLight = std::make_shared<DirectionalLight>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 3.0f);
+		directionalLight->setDirection({ 0.0f, 1.0f, 1.0f });
+
+		m_lightManager.addLight(directionalLight);
+	}
 
 	// create framebuffers
 	createGbuffer();
@@ -26,8 +41,18 @@ void DeferredRenderer::init()
 
 void DeferredRenderer::preprocess()
 {
-	// preprocess scene
-	m_scene->preprocess();
+	// skybox
+	m_skyBox.initData(std::vector<std::filesystem::path>{
+		"res/textures/skybox/pure/px.png",
+			"res/textures/skybox/pure/nx.png",
+			"res/textures/skybox/pure/py.png",
+			"res/textures/skybox/pure/ny.png",
+			"res/textures/skybox/pure/pz.png",
+			"res/textures/skybox/pure/nz.png"
+	});
+	m_skyBox.convolveCubemap(m_shaderManager.getShader(ShaderName::CONVOLUTION));
+	m_skyBox.prefilterCubemap(m_shaderManager.getShader(ShaderName::PREFILTER));
+	m_skyBox.generateBRDFLUTTexture(m_shaderManager.getShader(ShaderName::PRE_BRDF));
 
 	// shadow
 	m_shadow = Shadow(2048, 2048);
@@ -35,7 +60,7 @@ void DeferredRenderer::preprocess()
 
 void DeferredRenderer::update(std::shared_ptr<Window> window, float deltaTime)
 {
-	m_scene->update(window, deltaTime);
+	m_camera.update(window, deltaTime);
 }
 
 void DeferredRenderer::draw(glm::vec2 renderSize)
@@ -50,8 +75,7 @@ void DeferredRenderer::draw(glm::vec2 renderSize)
 	// lighting pass on quad
 	lightingPass();	
 
-	m_scene->getSkyBox().draw(glm::mat4(glm::mat3(m_scene->getCamera().getViewMatrix())), 
-		m_scene->getCamera().getProjectionMatrix(), m_scene->getShaderManager().getShader(ShaderName::SKYBOX));
+	m_skyBox.draw(glm::mat4(glm::mat3(m_camera.getViewMatrix())), m_camera.getProjectionMatrix(), m_shaderManager.getShader(ShaderName::SKYBOX));
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -67,7 +91,7 @@ void DeferredRenderer::resize(glm::vec2 renderSize)
 
 void DeferredRenderer::setCameraAspectRatio(float aspectRatio)
 {
-	m_scene->getCamera().setAspectRatio(aspectRatio);
+	m_camera.setAspectRatio(aspectRatio);
 }
 
 void DeferredRenderer::createGbuffer()
@@ -205,8 +229,7 @@ void DeferredRenderer::createLightingFramebuffer()
 
 void DeferredRenderer::shadowPass()
 {
-	m_shadow.renderShadowMap(m_scene->getModels(), m_scene->getShaderManager().getShader(ShaderName::SHADOW), 
-		m_scene->getLightManager().getDirectionalLight()->getDirection());
+	m_shadow.renderShadowMap(m_models, m_shaderManager.getShader(ShaderName::SHADOW), m_lightManager.getDirectionalLight()->getDirection());
 }
 
 void DeferredRenderer::geometryPass()
@@ -220,7 +243,7 @@ void DeferredRenderer::geometryPass()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
-	for (auto& model : m_scene->getModels())
+	for (auto& model : m_models)
 	{
 		for (const auto& mesh : model.getMeshes())
 		{
@@ -235,9 +258,9 @@ void DeferredRenderer::geometryPass()
 				}
 
 				Material material = model.getMaterials()[entry.materialIndex];
-				material.setShader(m_scene->getShaderManager().getShader(ShaderName::GBUFFER));
+				material.setShader(m_shaderManager.getShader(ShaderName::GBUFFER));
 				material.useGeometryPass(model.getModelMatrix(), 
-					m_scene->getCamera().getProjectionMatrix() * m_scene->getCamera().getViewMatrix());
+					m_camera.getProjectionMatrix() * m_camera.getViewMatrix());
 
 				glDrawElementsBaseVertex(GL_TRIANGLES,
 					entry.numIndices,
@@ -261,10 +284,10 @@ void DeferredRenderer::lightingPass()
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
 
-	std::shared_ptr<Shader> shader = m_scene->getShaderManager().getShader(ShaderName::PBR);
+	std::shared_ptr<Shader> shader = m_shaderManager.getShader(ShaderName::PBR);
 	shader->bind();
 
-	shader->setUniform("cameraPos", m_scene->getCamera().getPosition());
+	shader->setUniform("cameraPos", m_camera.getPosition());
 
 	// bind gbuffer textures
 	glActiveTexture(GL_TEXTURE0);
@@ -287,15 +310,15 @@ void DeferredRenderer::lightingPass()
 	shader->setUniform("gDepth", 5);
 
 	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_scene->getSkyBox().getIrradianceMapID());
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyBox.getIrradianceMapID());
 	shader->setUniform("irradianceMap", 6);
 
 	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_scene->getSkyBox().getPrefilterMapID());
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyBox.getPrefilterMapID());
 	shader->setUniform("prefilterMap", 7);
 
 	glActiveTexture(GL_TEXTURE8);
-	glBindTexture(GL_TEXTURE_2D, m_scene->getSkyBox().getBRDFLUTTexture());
+	glBindTexture(GL_TEXTURE_2D, m_skyBox.getBRDFLUTTexture());
 	shader->setUniform("brdfLUT", 8);
 
 	// bind shadow map
@@ -305,7 +328,7 @@ void DeferredRenderer::lightingPass()
 	shader->setUniform("lightSpaceMatrix", m_shadow.getLightSpaceMatrix());
 
 	// bind light data
-	m_scene->getLightManager().updateShader(m_scene->getShaderManager().getShader(ShaderName::PBR));
+	m_lightManager.updateShader(m_shaderManager.getShader(ShaderName::PBR));
 
 	// draw quad
 	glBindVertexArray(m_quadVAO);

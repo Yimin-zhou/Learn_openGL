@@ -6,8 +6,7 @@ Light::Light(const LightType type, const glm::vec3& position, const glm::vec3& c
 	m_color(color),
 	m_intensity(intensity),
 	m_direction(0.0f, -1.0f, 0.0f),
-	m_rotation(0.0f, 0.0f, 0.0f),
-	m_lightSize(7.0f)
+	m_rotation(0.0f, 0.0f, 0.0f)
 {
 
 }
@@ -68,8 +67,6 @@ void Light::setIntensity(float intensity)
 {
 	m_intensity = intensity;
 }
-
-
 
 void Light::accept(LightVisitor& visitor)
 {
