@@ -34,15 +34,13 @@ public:
 	SkyBox& getSkyBox() override { return m_skyBox; }
 
 	const GBuffer& getGBuffer() { return m_gBuffer; }
-
-	// shadow
 	uint32_t getShadowMap() { return m_shadow.getShadowMap(); }
 
 public:
 	// scene model path 
 	std::filesystem::path modelPath = "res/models/spaceman/spaceman.obj";
 
-private:
+protected:
 	void createGbuffer();
 	void createLightingFramebuffer();
 

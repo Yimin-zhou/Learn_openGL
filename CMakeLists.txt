@@ -53,7 +53,7 @@ set(CORE_SOURCES
     "src/render/forwardRenderer.h"
     "src/core/application.cpp" 
     "src/core/application.h"
- "src/render/deferredRenderer.cpp" "src/render/deferredRenderer.h" "src/render/renderer.h" "src/render/gbuffer.h" "src/render/shadow.h" "src/render/shadow.cpp")
+ "src/render/deferredRenderer.cpp" "src/render/deferredRenderer.h" "src/render/renderer.h" "src/render/gbuffer.h" "src/render/shadow.h" "src/render/shadow.cpp" "src/render/scenes/sss.h" "src/render/scenes/sss.cpp")
 
  set(RENDER_SOURCES
     "src/model/model.h"
@@ -86,7 +86,7 @@ set(UTIL_SOURCES
     "src/window/window.h" 
     "src/util/config.h"
   
-  "src/render/scene.h" "src/render/scene.cpp" "src/window/imGuiManager.h" "src/window/imGuiManager.cpp")
+    "src/window/imGuiManager.h" "src/window/imGuiManager.cpp")
 
 # Add executable
 add_executable(OpenGL_Render 
