@@ -23,6 +23,7 @@ private:
     std::shared_ptr<Window> m_window;
     std::shared_ptr<Renderer> m_renderer;
     std::shared_ptr<ImGuiManager> m_imGuiManager;
+    std::shared_ptr<Scene> m_currentScene;
 
     // Input handling methods
     float m_deltaTime, m_lastFrame;

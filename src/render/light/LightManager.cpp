@@ -46,6 +46,7 @@ void ShaderLightUpdater::visit(DirectionalLight& light)
 	m_shader->setUniform("directionalLight.direction", light.getDirection());
 	m_shader->setUniform("directionalLight.color", light.getColor());
 	m_shader->setUniform("directionalLight.intensity", light.getIntensity());
+	m_shader->setUniform("directionalLight.size", light.getLightSize());
 }
 
 void ShaderLightUpdater::visit(PointLight& light)
@@ -57,6 +58,7 @@ void ShaderLightUpdater::visit(PointLight& light)
 	m_shader->setUniform("pointLights[" + std::to_string(m_pointCount) + "].linear", light.getLinear());
 	m_shader->setUniform("pointLights[" + std::to_string(m_pointCount) + "].quadratic", light.getQuadratic());
 	m_shader->setUniform("pointLights[" + std::to_string(m_pointCount) + "].radius", light.getRadius());
+	m_shader->setUniform("pointLights[" + std::to_string(m_pointCount) + "].size", light.getLightSize());
 	m_pointCount++;
 	m_shader->setUniform("activePointLights", m_pointCount);
 }
@@ -72,5 +74,7 @@ void ShaderLightUpdater::visit(SpotLight& light)
 	m_shader->setUniform("spotLights[" + std::to_string(m_spotCount) + "].quadratic", light.getQuadratic());
 	m_shader->setUniform("spotLights[" + std::to_string(m_spotCount) + "].cutOff", light.getInnerCutoff());
 	m_shader->setUniform("spotLights[" + std::to_string(m_spotCount) + "].outerCutOff", light.getOuterCutoff());
+	m_shader->setUniform("spotLights[" + std::to_string(m_spotCount) + "].size", light.getLightSize());
+
 	m_spotCount++;
 }

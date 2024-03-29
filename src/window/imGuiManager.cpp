@@ -137,6 +137,12 @@ void ImGuiManager::draw(uint32_t texture)
 			{
 				dirLight->setIntensity(intensity);
 			}
+			float size = dirLight->getLightSize();
+			if (ImGui::DragFloat("Size", &size, 0.01f, 0.0f, 50.0f))
+			{
+				dirLight->setLightSize(size);
+			}
+
 
 		}
 
@@ -380,7 +386,7 @@ void ImGuiManager::modelInspector()
 			// show materials
 			if (model.getType() == ModelType::OPAQUE)
 			{
-				ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.3f, 1.0f), "STATIC");
+				ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.3f, 1.0f), "OPAQUE");
 				auto& materials = model.getMaterials();
 				ImGui::Separator();
 				ImGui::Indent();
@@ -403,7 +409,7 @@ void ImGuiManager::modelInspector()
 
 						if (ImGui::BeginCombo("Shader", shaderToString(currentShaderName).c_str()))
 						{
-							for (int j = 0; j < static_cast<int>(ShaderName::SIZE); j++)
+							for (int j = 0; j < static_cast<int>(2); j++)
 							{
 								bool isSelected = (currentShaderName == static_cast<ShaderName>(j));
 								if (ImGui::Selectable(shaderToString(static_cast<ShaderName>(j)).c_str(), isSelected))

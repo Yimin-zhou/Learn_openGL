@@ -26,6 +26,7 @@ public:
 
 	virtual void setCameraAspectRatio(float aspectRatio) = 0;
 	virtual uint32_t getFinalTexture() = 0;
+	virtual ShaderManager& getShaderManager() = 0;
 
 	virtual std::vector<Model>& getModels() = 0;
 

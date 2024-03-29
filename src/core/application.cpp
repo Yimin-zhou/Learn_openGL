@@ -2,6 +2,10 @@
 
 #include "application.h"
 
+#include "render/scenes/defaultSence.h"
+#include "render/scenes/sssSence.h"
+
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) 
 {
 	const float targetAspectRatio = 16.0f / 9.0f;
@@ -30,8 +34,9 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 Application::Application(int h, int w, const char* name)
 : m_height(h), m_width(w), m_name(name), m_deltaTime(0.0f), m_lastFrame(0.0f)
 {
+	m_currentScene = std::make_shared<SSS>();
 	m_window = std::make_shared<Window>(m_height, m_width, m_name);
-	m_renderer = std::make_shared<DeferredRenderer>();
+	m_renderer = std::make_shared<DeferredRenderer>(m_currentScene);
 	m_imGuiManager = std::make_shared<ImGuiManager>(m_window, m_renderer);
 }
 
