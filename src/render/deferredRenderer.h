@@ -36,9 +36,6 @@ public:
 	const GBuffer& getGBuffer() { return m_gBuffer; }
 	uint32_t getShadowMap() { return m_shadow.getShadowMap(); }
 
-public:
-	// scene model path 
-	std::filesystem::path modelPath = "res/models/spaceman/spaceman.obj";
 
 protected:
 	void createGbuffer();
@@ -64,6 +61,7 @@ protected:
 	glm::vec2 m_renderSize;
 
 	// scene
+	std::filesystem::path modelPath;
 	std::vector<Model> m_models;
 	ShaderManager m_shaderManager;
 	LightManager m_lightManager;

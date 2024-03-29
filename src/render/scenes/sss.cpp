@@ -2,6 +2,7 @@
 
 void SSSRenderer::init()
 {
+	modelPath = "res/models/queen/queen.obj";
 	m_models.push_back(Model(modelPath, ModelType::OPAQUE));
 
 	m_shaderManager.buildShader(ShaderName::GBUFFER, "shader/deferred/geo_vert.glsl", "shader/deferred/geo_frag.glsl");

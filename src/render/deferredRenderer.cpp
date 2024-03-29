@@ -16,6 +16,7 @@ DeferredRenderer::DeferredRenderer() :
 
 void DeferredRenderer::init()
 {
+	modelPath = "res/models/spaceman/spaceman.obj";
 	m_models.push_back(Model(modelPath, ModelType::OPAQUE));
 
 	m_shaderManager.buildShader(ShaderName::GBUFFER, "shader/deferred/geo_vert.glsl", "shader/deferred/geo_frag.glsl");
