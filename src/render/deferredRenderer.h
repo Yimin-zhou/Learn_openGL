@@ -44,6 +44,7 @@ protected:
 	void shadowPass();
 	void geometryPass();
 	void lightingPass();
+	void forwardPass();
 
 	// quad
 	uint32_t m_quadVAO;

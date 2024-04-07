@@ -2,6 +2,7 @@
 
 #include "application.h"
 #include "render/scenes/sss.h"
+#include "render/scenes/rover.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) 
 {
@@ -32,7 +33,7 @@ Application::Application(int h, int w, const char* name)
 : m_height(h), m_width(w), m_name(name), m_deltaTime(0.0f), m_lastFrame(0.0f)
 {
 	m_window = std::make_shared<Window>(m_height, m_width, m_name);
-	m_renderer = std::make_shared<SSSRenderer>();
+	m_renderer = std::make_shared<RoverRender>();
 	m_imGuiManager = std::make_shared<ImGuiManager>(m_window, m_renderer);
 }
 

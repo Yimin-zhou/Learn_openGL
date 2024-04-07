@@ -46,6 +46,7 @@ void ShaderLightUpdater::visit(DirectionalLight& light)
 	m_shader->setUniform("directionalLight.direction", light.getDirection());
 	m_shader->setUniform("directionalLight.color", light.getColor());
 	m_shader->setUniform("directionalLight.intensity", light.getIntensity());
+	m_shader->setUniform("directionalLight.size", light.getSize());
 }
 
 void ShaderLightUpdater::visit(PointLight& light)

@@ -55,6 +55,9 @@ public:
 
 	void setIntensity(float intensity);
 
+	void setSize(float size) { m_size = size; }
+	float getSize() const { return m_size; }
+
 	virtual void accept(LightVisitor& visitor) = 0;
 
 private:
@@ -65,4 +68,5 @@ private:
 	glm::vec3 m_rotation;
 	glm::vec3 m_color;
 	float m_intensity;
+	float m_size;
 };

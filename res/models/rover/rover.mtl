@@ -1,0 +1,76 @@
+# Blender 4.1.0 MTL File: 'None'
+# www.blender.org
+
+newmtl ExoRov_Wheels
+Ks 0.165875 0.165875 0.165875
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+norm textures/Exo-Wheels_normal.jpg
+map_Kd textures/Exo-Wheels_grey.jpg
+map_Pm textures/Exo-Wheels_metallic.jpg
+map_Pr textures/Exo-Wheels_roughness.jpg
+map_Ka textures/Exo-Wheels_Ao.jpg
+
+newmtl Exoplanet-Rover
+Ks 0.141554 0.141554 0.141554
+Ni 1.500000
+d 1.000000
+illum 2
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+norm textures/Exo_normal.jpg
+map_Kd textures/Exo_grey.jpg
+map_Pm textures/Exo_metallic.jpg
+map_Pr textures/Exo_roughness.jpg
+# map_Ke textures/Exo_emissive.jpg
+map_Ka textures/Exo_Ao.jpg
+
+newmtl Glass
+Kd 0.066427 0.207642 0.374924
+Ks 0.263157 0.263157 0.263157
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 0.092913
+illum 6
+Pr 1.000000
+Pm 0.165875
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+norm ../universalMaps/normal.png
+map_Kd ../universalMaps/albedo.png
+map_Pm ../universalMaps/metallic.png
+map_Pr ../universalMaps/roughness.png
+map_Ka ../universalMaps/ao.png
+
+newmtl floor
+Kd 0.900000 0.900000 0.900000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+Pr 0.500000
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+norm ../universalMaps/normal.png
+map_Kd ../universalMaps/albedo.png
+map_Pm ../universalMaps/metallic.png
+map_Pr ../universalMaps/roughness.png
+map_Ka ../universalMaps/ao.png

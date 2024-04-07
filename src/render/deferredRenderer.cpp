@@ -340,3 +340,8 @@ void DeferredRenderer::lightingPass()
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 }
+
+void DeferredRenderer::forwardPass()
+{
+
+}

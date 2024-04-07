@@ -25,6 +25,7 @@ struct DirectionalLight
     vec3 direction;
     vec3 color;
     float intensity;
+    float size;
 };
 
 // Point light struct
@@ -327,13 +328,13 @@ float PCF_Filter( vec2 shadowCoord, float receiverDepth, float radius, float bia
     return sum / float(PCF_NUM_SAMPLES);
 } 
 
-float ShadowCalculation(vec4 fragPosLightSpace, vec3 n, vec3 l)
+float ShadowCalculation(vec4 fragPosLightSpace, vec3 n, vec3 l, float size)
 {
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     float receiverDepth = projCoords.z;
-    float lightSize = 0.05;
+    float lightSize = size * 0.01;
     float NEAR = 1.0;
 
     // 1. blocker search
@@ -345,10 +346,11 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 n, vec3 l)
 
     // 2. estimate penumbra size
     float penumbra = PenumbraSize(receiverDepth, averageBlockerDepth, lightSize);
-    float filterRadius = penumbra * lightSize * NEAR / receiverDepth;
+//    float filterRadius = penumbra * lightSize * NEAR / receiverDepth;
+	float filterRadius = penumbra;
 
     // 3. PCF
-    float bias = max(0.05 * (1.0 - dot(n, l)), 0.005);  
+    float bias = max(0.01 * (1.0 - dot(n, l)), 0.005);  
     float shadow = PCF_Filter(projCoords.xy, receiverDepth, filterRadius, bias);
 
     return shadow;
@@ -392,7 +394,7 @@ void main()
     // Shadow calculation
     vec3 normalOffsetPos = worldPosition + N * 0.05;
     vec4 fragPosLightSpace = lightSpaceMatrix * vec4(normalOffsetPos, 1.0);
-    float shadow = ShadowCalculation(fragPosLightSpace, N, directionalLight.direction);
+    float shadow = ShadowCalculation(fragPosLightSpace, N, directionalLight.direction, directionalLight.size);
     Lo *= (1 - shadow);
 
     // point

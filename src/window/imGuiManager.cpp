@@ -137,6 +137,11 @@ void ImGuiManager::draw(uint32_t texture)
 			{
 				dirLight->setIntensity(intensity);
 			}
+			float size = dirLight->getSize();
+			if (ImGui::DragFloat("Size", &size, 0.01f, 0.0f, 6.0f))
+			{
+				dirLight->setSize(size);
+			}
 
 		}
 
@@ -219,6 +224,19 @@ void ImGuiManager::draw(uint32_t texture)
 
 		if (renderer)
 		{
+			// PBR prefiltering
+			//ImGui::Text("Prefiltering");
+			//ImGui::Separator();
+			//ImGui::Text("IrradianceMap:");
+			//ImGui::Image((void*)(intptr_t)renderer->getSkyBox().getIrradianceMapID(), ImVec2(270, 270), ImVec2(0, 1), ImVec2(1, 0));
+			//ImGui::Separator();
+			//ImGui::Text("PrefilterMap:");
+			//ImGui::Image((void*)(intptr_t)renderer->getSkyBox().getPrefilterMapID(), ImVec2(270, 270), ImVec2(0, 1), ImVec2(1, 0));
+			//ImGui::Text("BRDF LUT:");
+			//ImGui::Image((void*)(intptr_t)renderer->getSkyBox().getBRDFLUTTexture(), ImVec2(270, 270), ImVec2(0, 1), ImVec2(1, 0));
+
+			//ImGui::Separator();
+
 			GBuffer gBuffer = renderer->getGBuffer();
 			ImGui::Text("Deferred Pipeline G-Buffer");
 			ImGui::Text("World Position: ");
