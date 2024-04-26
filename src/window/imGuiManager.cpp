@@ -216,6 +216,14 @@ void ImGuiManager::draw(uint32_t texture)
 	{
 		ImGui::Begin("Debug");
 		ImGui::Separator();
+
+		ImGui::Text("Camera:");
+		ImGui::Text("Position: %.2f, %.2f, %.2f", m_renderer->getCamera().getPosition().x, m_renderer->getCamera().getPosition().y, m_renderer->getCamera().getPosition().z);
+		ImGui::Text("Yaw: %.2f", m_renderer->getCamera().getYaw());
+		ImGui::Text("Pitch: %.2f", m_renderer->getCamera().getPitch());
+
+		ImGui::Separator();
+
 		ImGui::Text("Performance:");
 		ImGui::Text(" %.3f ms , %.1f FPS", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Separator();

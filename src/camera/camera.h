@@ -16,6 +16,8 @@ public:
 
 	glm::vec3 getPosition() const { return m_position; }
 	glm::vec3 getViewDirection() const { return m_front; }
+	float getYaw() const { return m_yaw; }
+	float getPitch() const { return m_pitch; }
 
 	glm::mat4 getViewMatrix() const;
 	glm::mat4 getProjectionMatrix() const;

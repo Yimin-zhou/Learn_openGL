@@ -57,6 +57,7 @@ void main()
     else if (face == 3) N = vec3(uv.x, -1, -uv.y); // Negative Y
     else if (face == 4) N = vec3(uv.x, -uv.y, 1); // Positive Z
     else if (face == 5) N = vec3(-uv.x, -uv.y, -1); // Negative Z
+
     vec3 R = N;
     vec3 V = R;
     float totalWeight = 0.0;

@@ -40,6 +40,8 @@ public:
 	void setMaterial(int index, const Material& material) { m_materials[index] = material; }
 	void setMaterials(const std::vector<Material>& materials) { m_materials = materials; }
 
+	void rotateModelHorizontal(float speed);
+
 private:
 	ModelType m_type;
 	std::string m_name;

@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <iostream>
 #include <stb_image.h>
+#include <GLFW/glfw3.h>
 
 
 SkyBox::SkyBox() 
@@ -82,6 +83,9 @@ void SkyBox::draw(glm::mat4 view, glm::mat4 projection, std::shared_ptr<Shader> 
 	shader->bind();
 	shader->setUniform("view", glm::mat4(glm::mat3(view)));
 	shader->setUniform("projection", projection);
+	float time = glfwGetTime();
+	shader->setUniform("time", time);
+	shader->setUniform("speed", 0.05f);
 
 	glBindVertexArray(m_vao);
 	glBindTextureUnit(0, m_cubemapTextureID);

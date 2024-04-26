@@ -51,6 +51,12 @@ glm::vec3 Model::getScale()
 	return m_scale;
 }
 
+void Model::rotateModelHorizontal(float speed)
+{
+	m_rotation += glm::vec3(0.0f, speed, 0.0f);
+	updateModelMatrix();
+}
+
 void Model::updateModelMatrix()
 {
 	m_modelMatrix = glm::mat4(1.0f);
@@ -141,7 +147,7 @@ void Model::loadMesh(const std::filesystem::path& filePath)
 		material.pbrParameter.setNormalMap(std::make_shared<Texture>(parentPath / mat.normal_texname));
 		material.pbrParameter.setAoMap(std::make_shared<Texture>(parentPath / mat.ambient_texname));
 		// Add more material properties here as needed
-		material.pbrParameter.setRoughness(1.0f);
+		material.pbrParameter.setRoughness(mat.roughness);
 		material.pbrParameter.setMetallic(1.0f);
 		m_materials.push_back(material);
 	}

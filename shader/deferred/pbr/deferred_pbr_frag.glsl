@@ -3,6 +3,8 @@ out vec4 FragColor;
 
 in vec2 fragTexcoords;
 
+uniform float time;
+
 uniform sampler2D gWorldPos;
 uniform sampler2D gWorldNormal;
 uniform sampler2D gAlbedo;
@@ -411,8 +413,19 @@ void main()
 //    }
 //
 
+    // the skybox is rotating, so we need to rotate the sample vectors as well
+    float speed = 0.05;
+	mat4 invSkyboxModelMatrix = inverse(mat4(
+		vec4(cos(time * speed), 0.0, sin(time * speed), 0.0),
+		vec4(0.0, 1.0, 0.0, 0.0),
+		vec4(-sin(time * speed), 0.0, cos(time * speed), 0.0),
+		vec4(0.0, 0.0, 0.0, 1.0)
+	));
+
+    vec3 rotatedNormal = (invSkyboxModelMatrix * vec4(N, 0.0)).xyz;
+    vec3 irradiance = texture(irradianceMap, rotatedNormal).rgb;
+
     // indirect (single scattering)
-//    vec3 irradiance = texture(irradianceMap, normal).rgb;
 //    vec3 ks = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
 //    vec3 kd = 1.0 - ks;
 //    vec3 diffuse = kd * albedo * irradiance * (1 - metalness);
@@ -427,12 +440,11 @@ void main()
 //    vec3 indirectLight = (diffuse + specular) * ao;
 
     // indirect (multiple scattering)
-    vec3 irradiance = texture(irradianceMap, normal).rgb;
-
     vec3 ks = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
-    vec3 R = reflect(-V, N);
-    float mipLevel = roughness * 4.0;
-    vec3 prefilteredColor = textureLod(prefilterMap, R, mipLevel).rgb;
+    vec3 R = (invSkyboxModelMatrix * vec4(reflect(-V, N), 0.0)).xyz;
+
+    float mipLevel = floor(roughness * 4.0);
+    vec3 prefilteredColor = textureLod(prefilterMap, R, 0).rgb;
     vec2 envBRDF = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
 
     vec3 FssEss = ks * envBRDF.x + envBRDF.y;

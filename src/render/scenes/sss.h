@@ -12,8 +12,7 @@ public:
 	void draw(glm::vec2 renderSize) override;
 
 protected:
-	// override
-	void lightingPass();
+	void lightingPass() override;
 
 	// SSS
 };

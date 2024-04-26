@@ -13,7 +13,7 @@ public:
 
 protected:
 	// override
-	void lightingPass();
-	void forwardPass();
+	void lightingPass() override;
+	void forwardPass() override;
 
 };

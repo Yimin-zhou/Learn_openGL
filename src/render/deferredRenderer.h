@@ -41,10 +41,10 @@ protected:
 	void createGbuffer();
 	void createLightingFramebuffer();
 
-	void shadowPass();
-	void geometryPass();
-	void lightingPass();
-	void forwardPass();
+	void shadowPass() override;
+	void geometryPass() override;
+	void lightingPass() override;
+	void forwardPass() override;
 
 	// quad
 	uint32_t m_quadVAO;

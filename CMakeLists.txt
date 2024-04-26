@@ -3,6 +3,9 @@ project(OpenGL_Render VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/libs")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/libs")
+
 # Add subdirectories
 add_subdirectory(vendor/glfw)
 add_subdirectory(vendor/glew)
@@ -53,7 +56,16 @@ set(CORE_SOURCES
     "src/render/forwardRenderer.h"
     "src/core/application.cpp" 
     "src/core/application.h"
- "src/render/deferredRenderer.cpp" "src/render/deferredRenderer.h" "src/render/renderer.h" "src/render/gbuffer.h" "src/render/shadow.h" "src/render/shadow.cpp" "src/render/scenes/sss.h" "src/render/scenes/sss.cpp" "src/render/scenes/rover.h" "src/render/scenes/rove.cpp")
+ "src/render/deferredRenderer.cpp" 
+ "src/render/deferredRenderer.h" 
+ "src/render/renderer.h" 
+ "src/render/gbuffer.h" 
+ "src/render/shadow.h" 
+ "src/render/shadow.cpp" 
+ "src/render/scenes/sss.h" 
+ "src/render/scenes/sss.cpp" 
+ "src/render/scenes/rover.h" 
+ "src/render/scenes/rover.cpp")
 
  set(RENDER_SOURCES
     "src/model/model.h"

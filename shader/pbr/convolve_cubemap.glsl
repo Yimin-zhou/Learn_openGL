@@ -25,8 +25,8 @@ void main()
     else if (face == 5) normal = vec3(-uv.x, -uv.y, -1); // Negative Z
 
     vec3 up = abs(normal.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
-    vec3 right = normalize(cross(up, normal));
-    up = normalize(cross(normal, right));
+    vec3 tangent = normalize(cross(up, normal));
+    vec3 bitangent = normalize(cross(normal, tangent));
 
     float sampleDelta = 0.025;
     float nrSamples = 0.0; 
@@ -37,7 +37,7 @@ void main()
             // spherical to cartesian (in tangent space)
             vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
             // tangent space to world
-            vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal; 
+            vec3 sampleVec = tangentSample.x * tangent + tangentSample.y * bitangent + tangentSample.z * normal; 
 
             irradiance += texture(sourceCubemap, sampleVec).rgb * cos(theta) * sin(theta);
             nrSamples++;

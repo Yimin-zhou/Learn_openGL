@@ -6,7 +6,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 DeferredRenderer::DeferredRenderer() :
-	m_camera(Camera(glm::vec3(0.0f, 1.0f, 2.0f), -90.0f, 0.0f, 3.0f, 0.05f)),
+	m_camera(Camera(glm::vec3(-2.35f, 1.8f, 2.51f), -61.80f, -18.65f, 3.0f, 0.05f)),
 	m_aspectRatio(16.0f / 9.0f),
 	m_lightingFBO(0), m_lightingTexture(0), m_shaderManager(ShaderManager()), m_lightManager(LightManager()),
 	m_skyBox(SkyBox()), m_gBuffer(),
@@ -246,6 +246,7 @@ void DeferredRenderer::geometryPass()
 
 	for (auto& model : m_models)
 	{
+		//model.rotateModelHorizontal(0.005f);
 		for (const auto& mesh : model.getMeshes())
 		{
 			// draw mesh

@@ -36,4 +36,12 @@ public:
 
 	// skybox
 	virtual SkyBox& getSkyBox() = 0;
+
+protected:
+	virtual void createGbuffer() = 0;
+	virtual void createLightingFramebuffer() = 0;
+	virtual void shadowPass() = 0;
+	virtual void geometryPass() = 0;
+	virtual void lightingPass() = 0;
+	virtual void forwardPass() = 0;
 };

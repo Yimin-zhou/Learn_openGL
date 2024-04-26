@@ -32,6 +32,15 @@ public:
 	// scene model path 
 	std::filesystem::path modelPath = "res/models/spaceman/spaceman.obj";
 
+protected:
+	void createGbuffer() override {};
+	void createLightingFramebuffer() override {};
+
+	void shadowPass() override {};
+	void geometryPass() override {};
+	void lightingPass() override {};
+	void forwardPass() override {};
+
 private:
 	void createFinalBuffer();
 
